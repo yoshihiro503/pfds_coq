@@ -36,6 +36,7 @@ Module UnbalancedSet (Element : Ordered).
   Infix ">?" := (fun x y => y <? x) (at level 60).
 
   Infix "<" := Element.lt.
+  Infix "<=" := Element.leq.
 
   Inductive Tree : Type :=
   | E : Tree
@@ -44,6 +45,12 @@ Module UnbalancedSet (Element : Ordered).
   Inductive TreeForall (P : Elem -> Prop) : Tree -> Prop :=
   | TreeForallE : TreeForall P E
   | TreeForallT : forall x t1 t2, P x -> TreeForall P t1 -> TreeForall P t2 -> TreeForall P (T t1 x t2).
+
+  Lemma TreeForall_impl : forall (P Q: Elem -> Prop),
+      (forall x, P x -> Q x) ->
+      forall t, TreeForall P t -> TreeForall Q t.
+  Proof.
+  Admitted.
 
   Inductive Ordered : Tree -> Prop :=
   | OrderedE : Ordered E
@@ -122,6 +129,7 @@ Module UnbalancedSet (Element : Ordered).
   Qed.
 
   Lemma member_aux_complete_1 : forall x t,
+      Ordered t -> TreeForall (fun e => x <= e) t ->
       member2_aux x t (Some x) = true.
   Proof.
   Admitted.    
@@ -135,7 +143,10 @@ Module UnbalancedSet (Element : Ordered).
     - (* x = y のとき *)
       simpl. case_eq (x <? x); intros Hxlt.
       + apply Element.lt_bool_correct in Hxlt. now destruct (Element.lt_irrefl x).
-      + now apply member_aux_complete_1.
+      + apply member_aux_complete_1.
+        * now inversion HOrdered.
+        * inversion HOrdered. subst.
+          eapply TreeForall_impl; [|exact H5]. intros e. simpl. unfold Element.lt. tauto.
     - (* Member x a *)
       inversion HOrdered. subst.
       simpl. case_eq (x <? y); intros Hltxy; [now apply IHHmem | ].
@@ -151,11 +162,12 @@ Module UnbalancedSet (Element : Ordered).
   Qed.
 
   Lemma member_aux_complete : forall x t cand,
-      Ordered t -> (Member x t \/ cand = Some x) -> member2_aux x t cand = true.
+      Ordered t ->
+      (Member x t \/ (cand = Some x /\ TreeForall (fun e => x <= e) t)) -> member2_aux x t cand = true.
   Proof.
     intros x t cand HOrdered H. destruct H.
     - now apply member_aux_complete_2.
-    - subst. now apply member_aux_complete_1.
+    - destruct H. subst. now apply member_aux_complete_1.
   Qed.
     
   Theorem member2_sound : forall x t,
@@ -165,9 +177,10 @@ Module UnbalancedSet (Element : Ordered).
   Qed.
 
   Theorem member2_complete : forall x t,
-      Ordered t -> Member x t -> member2 x t = true.
+      Ordered t ->
+      Member x t -> member2 x t = true.
   Proof.
-    intros x t HOrdered H. unfold member2. apply member_aux_complete; [assumption| now left].
+    intros x t HOrdered H. unfold member2. now apply member_aux_complete; [| now left].
   Qed.
   
   Fixpoint complete x d :=
@@ -191,6 +204,14 @@ Module UnbalancedSet (Element : Ordered).
     - simpl. now constructor.
   Qed.
 
+(*
+  (* 演習問題 2.5(b) *)
+  Fixpoint create2 (x : Elem) (size : nat) :=
+    match size with
+    | O => (E, T E x E)
+    | S p =>
+      l
+*)  
     
 End UnbalancedSet.
 
