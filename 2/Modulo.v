@@ -21,7 +21,7 @@ Definition quot_mod x y :=
   match y with
   | O => (O, x)
   | S p =>
-    let '(exist (q,r) _) := quotient_modulo (S p) (lt_O_Sn p) x in
+    let '(exist _ (q,r) _) := quotient_modulo (S p) (lt_O_Sn p) x in
     (q, r)
   end.
 
@@ -34,5 +34,3 @@ Proof.
   intros Heq_qr. injection Heq_qr. intros Heq_r Heq_q. subst.
   assumption.
 Qed.
-                        
-                        

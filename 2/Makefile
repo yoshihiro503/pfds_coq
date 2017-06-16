@@ -104,6 +104,7 @@ endif
 
 VFILES:=Result.v\
   Stack.v\
+  Modulo.v\
   BinaryTree.v
 
 ifneq ($(filter-out archclean clean cleanall printenv,$(MAKECMDGOALS)),)
@@ -235,8 +236,8 @@ uninstall: uninstall_me.sh
 	@echo "B $(COQLIB)config" >> .merlin
 	@echo "B $(COQLIB)ltac" >> .merlin
 	@echo "B $(COQLIB)engine" >> .merlin
-	@echo "B /Users/yoshihiro_imai/repo/pfds_coq/2" >> .merlin
-	@echo "S /Users/yoshihiro_imai/repo/pfds_coq/2" >> .merlin
+	@echo "B /Users/yoshihiro_imai/Dropbox/snip/pfds_coq/2" >> .merlin
+	@echo "S /Users/yoshihiro_imai/Dropbox/snip/pfds_coq/2" >> .merlin
 
 clean::
 	rm -f $(OBJFILES) $(OBJFILES:.o=.native) $(NATIVEFILES)
