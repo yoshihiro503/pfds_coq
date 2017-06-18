@@ -103,7 +103,8 @@ endif
 
 VFILES:=common/Result.v\
   common/Ordered.v\
-  2/BinaryTree.v
+  2/BinaryTree.v\
+  3/LeftistHeap.v
 
 ifneq ($(filter-out archclean clean cleanall printenv,$(MAKECMDGOALS)),)
 -include $(addsuffix .d,$(VFILES))

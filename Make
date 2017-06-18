@@ -2,3 +2,4 @@
 common/Result.v
 common/Ordered.v
 2/BinaryTree.v
+3/LeftistHeap.v
