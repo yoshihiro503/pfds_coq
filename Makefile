@@ -103,6 +103,7 @@ endif
 
 VFILES:=common/Result.v\
   common/Ordered.v\
+  common/Power.v\
   2/BinaryTree.v\
   3/LeftistHeap.v
 
