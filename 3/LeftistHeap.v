@@ -133,3 +133,43 @@ Proof.
     inversion Hrank1. inversion Hrank2. subst.
     apply makeT_rank; [assumption|]. now apply IH.
 Qed.
+
+(**
+   **** merge関数でLeftist性が保存される
+*)
+
+Lemma makeT_Leftist : forall x a b,
+    RankSound a -> RankSound b ->
+    Leftist a -> Leftist b ->
+    Leftist (makeT x a b).
+Proof.
+  intros x a b Hra Hrb Hla Hlb. unfold makeT.
+  destruct (le_lt_dec _ _).
+  - constructor; [|assumption|assumption].
+    now rewrite <- (RankSound_eq _ Hrb), <- (RankSound_eq _ Hra).
+  - constructor; [|assumption|assumption].
+    apply lt_le_weak. now rewrite <- (RankSound_eq _ Hrb), <- (RankSound_eq _ Hra).
+Qed.
+
+Lemma merge_Leftist : forall h1 h2,
+      RankSound h1 -> RankSound h2 ->
+      Leftist h1 -> Leftist h2 ->
+      Leftist (merge (h1, h2)).
+Proof.
+  cut (forall h1h2, RankSound (fst h1h2) -> RankSound (snd h1h2) -> Leftist (fst h1h2) -> Leftist (snd h1h2) -> Leftist (merge h1h2)); [intros; now apply H|].
+  intros h1h2. apply merge_ind.
+  - now intros.
+  - now intros.
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq _ IH Hr1 Hr2 Hl1 Hl2.
+    inversion Hr1. inversion Hl1. subst.
+    inversion Hr2. inversion Hl2. subst.
+    apply makeT_Leftist; [assumption| | assumption|].
+    + now apply merge_rank.
+    + now apply IH.
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq _ IH Hr1 Hr2 Hl1 Hl2.
+    inversion Hr1. inversion Hl1. subst.
+    inversion Hr2. inversion Hl2. subst.
+    apply makeT_Leftist; [assumption | | assumption|].
+    + now apply merge_rank.
+    + now apply IH.
+Qed.
