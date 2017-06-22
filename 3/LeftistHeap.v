@@ -1,8 +1,10 @@
-Require Import List Program Arith.
+Require Import List Program Arith String.
+Open Scope string_scope.
 Open Scope list_scope.
 
 Require Import PFDS.common.Ordered.
 Require Import PFDS.common.Power.
+Require Import PFDS.common.Result.
 
 Declare Module Elem : Ordered.
   
@@ -263,3 +265,41 @@ Proof.
       now apply (Elem.le_trans _ x).
     + assumption.
 Qed.
+
+(**
+   ** insert
+*)
+
+(**
+   *** insert関数の実装
+*)
+
+Definition insert x h := merge (T 1 x E E, h).
+
+(**
+   ** findMin
+*)
+
+(**
+   *** findMin 関数の実装
+*)
+
+Definition findMin h :=
+  match h with
+  | E => Error "Empty Heap"
+  | T _ x _ _ => Ok x
+  end.
+
+(**
+   ** deleteMin
+*)
+
+(**
+   *** deleteMin関数の実装
+*)
+
+Definition deleteMin h :=
+  match h with
+  | E => Error "Empty Heap"
+  | T _ _ a b => Ok (merge(a, b))
+  end.
