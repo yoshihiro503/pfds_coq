@@ -10,6 +10,19 @@ Inductive heap : Set :=
 | E : heap
 | T : nat -> Elem.T -> heap -> heap -> heap.
 
+Inductive HeapForall (P : Elem.T -> Prop) : heap -> Prop :=
+| HFE : HeapForall P E
+| HFT : forall r x a b, HeapForall P a -> HeapForall P b -> P x -> HeapForall P (T r x a b).
+
+Lemma HeapForall_impl : forall (P Q: Elem.T -> Prop),
+    (forall x, P x -> Q x) ->
+    forall h, HeapForall P h -> HeapForall Q h.
+Proof.
+  intros P Q Hpq h HForallP. induction HForallP.
+  - now constructor.
+  - now constructor; [| | apply Hpq].
+Qed.
+
 Fixpoint right_spine(h : heap) :=
   match h with
   | E => []
@@ -172,4 +185,81 @@ Proof.
     apply makeT_Leftist; [assumption | | assumption|].
     + now apply merge_rank.
     + now apply IH.
+Qed.
+
+(**
+   **** merge関数とHeapForallのいい関係
+*)
+
+Lemma makeT_Forall : forall P x a b,
+    (HeapForall P a /\ HeapForall P b /\ P x) <-> HeapForall P (makeT x a b).
+Proof.
+  intros P x a b. unfold makeT. destruct (le_lt_dec _ _); split; intros.
+  + now constructor.
+  + now inversion H.
+  + now constructor.
+  + now inversion H.
+Qed.
+
+Lemma merge_Forall : forall P h1 h2,
+    (HeapForall P h1 /\ HeapForall P h2) <-> HeapForall P (merge (h1,h2)).
+Proof.
+  intros P. cut (forall p, HeapForall P (fst p) /\ HeapForall P (snd p) <-> HeapForall P (merge p)); [intros; now destruct (H (h1,h2))|].
+  intros h1h2. apply merge_ind.
+  - intros. simpl. split; [tauto|]. now split; [constructor | ].
+  - intros. simpl. split; [tauto|]. now split; [ | constructor].
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq _ IH.
+    rewrite <- makeT_Forall. rewrite <- IH. split.
+    + intros H. destruct H as [H1 H2]. inversion H1. now inversion H2.
+    + intros H. split; [|tauto]. now constructor.
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq _ IH.
+    rewrite <- makeT_Forall. rewrite <- IH. split.
+    + intros H. destruct H as [H1 H2]. inversion H1. now inversion H2.
+    + intros H. split; [tauto|]. now constructor.
+Qed.
+
+
+(**
+   **** merge関数でヒープとしての性質: 「常にrootノードの値が最小値」を保存することを証明
+*)
+
+Inductive Heap : heap -> Prop :=
+| HeapE : Heap E
+| HeapT : forall r x a b, Heap a -> Heap b -> HeapForall (fun elem => Elem.leq x elem) (T r x a b) -> Heap (T r x a b).
+
+Lemma makeT_Heap : forall x a b,
+    Heap a -> Heap b ->
+    HeapForall (fun elem => Elem.leq x elem) a ->
+    HeapForall (fun elem => Elem.leq x elem) b ->
+    Heap (makeT x a b).
+Proof.
+Admitted.
+
+Lemma merge_Heap : forall h1 h2,
+    Heap h1 -> Heap h2 ->
+    Heap (merge (h1,h2)).
+Proof.
+  cut (forall p, Heap (fst p) -> Heap (snd p) -> Heap (merge p)); [intros; now apply H|].
+  intro h1h2. apply merge_ind.
+  - now intros.
+  - now intros.
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq Hleq IH Hh1 Hh2.
+    inversion Hh1. inversion Hh2. subst.
+    inversion H5. inversion H12. subst.
+    apply makeT_Heap; [assumption| now apply IH|assumption|].
+    apply merge_Forall. split; [assumption |].
+    eapply HeapForall_impl; [|now apply H12]. simpl. intros elem Helem.
+    now apply (Elem.le_trans _ y).
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq Hleq IH Hh1 Hh2.
+    inversion Hh1. inversion Hh2. subst.
+    inversion H5. inversion H12. subst.
+    apply makeT_Heap; [assumption| now apply IH|assumption|].
+    apply merge_Forall. split; [| assumption].
+    rewrite Elem.leq_bool_correct_inv in Hleq. apply Elem.not_le in Hleq. apply Elem.lt_le_incl in Hleq.
+    constructor.
+    + eapply HeapForall_impl; [ |now apply H3]. simpl. intros elem Helem.
+      now apply (Elem.le_trans _ x).
+    + eapply HeapForall_impl; [ |now apply H7]. simpl. intros elem Helem.
+      now apply (Elem.le_trans _ x).
+    + assumption.
 Qed.

@@ -12,6 +12,9 @@ Module Type Ordered.
   Axiom lt_bool_correct : forall x y, lt_bool x y = true <-> lt x y.
   Axiom lt_bool_correct_inv : forall x y, lt_bool x y = false <-> ~lt x y.
 
+  Axiom leq_bool_correct : forall x y, leq_bool x y = true <-> leq x y.
+  Axiom leq_bool_correct_inv : forall x y, leq_bool x y = false <-> ~leq x y.
+
   Axiom leq_total : forall x y, leq x y \/ leq y x.
   
   Axiom le_lteq : forall x y, leq x y <-> lt x y \/ x=y.
@@ -21,4 +24,7 @@ Module Type Ordered.
 
   Axiom lt_asymm: forall n m, lt n m -> ~ lt m n.
 
+  Axiom le_trans : forall n m p, leq n m -> leq m p -> leq n p.
+  Axiom not_le : forall n m, ~ leq n m -> lt m n.
+  Axiom lt_le_incl : forall n m, lt n m -> leq n m.
 End Ordered.
