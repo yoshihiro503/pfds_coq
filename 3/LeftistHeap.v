@@ -67,7 +67,7 @@ Definition rank h :=
   end.
 
 Definition makeT x a b :=
-  if le_lt_dec (rank a) (rank b) then T (1 + rank b) x a b
+  if le_lt_dec (rank b) (rank a) then T (1 + rank b) x a b
   else T (1 + rank a) x b a.
 
 Require Import Recdef.
@@ -91,3 +91,45 @@ Proof. (* 停止性の証明 *)
   - simpl. now auto with arith.
 Defined.
 
+(**
+   *** merge関数の証明
+*)
+
+(**
+   **** merge関数でrank関数の健全性が保たれる
+*)
+
+Inductive RankSound : heap -> Prop :=
+| RSE : RankSound E
+| RST : forall r x a b, RankSound a -> RankSound b -> rank (T r x a b) = calc_rank (T r x a b) -> RankSound(T r x a b).
+
+Lemma RankSound_eq : forall h,
+    RankSound h -> rank h = calc_rank h.
+Proof.
+  intros h Hrank. now induction Hrank.
+Qed.
+
+Lemma makeT_rank : forall x a b,
+  RankSound a -> RankSound b ->
+    RankSound (makeT x a b).
+Proof.
+  intros x a b Hranka Hrankb. unfold makeT.
+  destruct (le_lt_dec (rank b) (rank a)).
+  - constructor; [assumption| assumption|]. rewrite rank_T. now rewrite (RankSound_eq _ Hrankb).
+  - constructor; [assumption| assumption|]. rewrite rank_T. now rewrite (RankSound_eq _ Hranka).
+Qed.
+
+Lemma merge_rank : forall h1 h2,
+  RankSound h1 -> RankSound h2 -> RankSound (merge (h1,h2)).
+Proof.
+  cut (forall h1h2, RankSound (fst h1h2) -> RankSound (snd h1h2) -> RankSound (merge h1h2)); [intros; now apply H|].
+  intros h1h2. apply merge_ind.
+  - now intros.
+  - now intros.
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq Hleq IH Hrank1 Hrank2. subst.
+    inversion Hrank1. inversion Hrank2. subst.
+    apply makeT_rank; [assumption|]. now apply IH.
+  - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq Hleq IH Hrank1 Hrank2. subst.
+    inversion Hrank1. inversion Hrank2. subst.
+    apply makeT_rank; [assumption|]. now apply IH.
+Qed.
