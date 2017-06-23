@@ -1,5 +1,7 @@
 PFDSのアルゴリズムをCoqで書きたい
 
+![イミュータブルデータ構造は遅いような気がしていたがそんなことはなかったぜ！](http://raw.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/images/PFDS_kinaba.png)
+
 ## ディレクトリ構成
 
 ```tree
