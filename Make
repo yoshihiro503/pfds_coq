@@ -1,4 +1,5 @@
 -R "." "PFDS"
+COQDOCFLAGS = "--utf8"
 common/Result.v
 common/Ordered.v
 common/Power.v

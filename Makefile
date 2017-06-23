@@ -67,6 +67,7 @@ COQDOCLIBS?=\
 #                        #
 ##########################
 
+COQDOCFLAGS=--utf8
 
 OPT?=
 COQDEP?="$(COQBIN)coqdep" -c
