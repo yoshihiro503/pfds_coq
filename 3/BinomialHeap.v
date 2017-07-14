@@ -1,7 +1,9 @@
 Require Import List Program Arith String.
+Require Import Recdef.
 Open Scope string_scope.
 Open Scope list_scope.
 
+Require Import PFDS.common.Util.
 Require Import PFDS.common.Ordered.
 Require Import PFDS.common.Result.
 
@@ -76,3 +78,24 @@ Fixpoint insTree t heap :=
   end.
 
 Definition insert x heap := insTree (Node 0 x []) heap.
+
+(**
+   *** [merge] の実装
+ *)
+Function merge ts1_ts2 {measure (pair_size (@List.length tree) (@List.length tree)) ts1_ts2} :=
+  match (ts1_ts2) with
+  | (ts1, []) => ts1
+  | ([], ts2) => ts2
+  | (t1 :: ts1' as ts1, t2 :: ts2' as ts2) =>
+    if rank t1 <? rank t2 then
+      t1 :: merge (ts1', ts2)
+    else if rank t2 <? rank t1 then
+      t2 :: merge (ts1, ts2')
+    else
+      insTree (link t1 t2) (merge (ts1', ts2'))
+  end.
+Proof.
+  - simpl. now auto with arith.
+  - simpl. now auto with arith.
+  - simpl. now auto with arith.
+Defined.
