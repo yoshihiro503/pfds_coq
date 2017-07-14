@@ -61,6 +61,7 @@ Definition rank t :=
   end.
 
 (**
+   *** [insert] の実装
    ヒープに[Elem.T]型の要素を１つだけ追加する[insert]関数の定義。(p.31)
    [insert]は要素数1の二項木を追加するというアルゴリズムで実現する。
  *)
@@ -74,4 +75,4 @@ Fixpoint insTree t heap :=
       insTree(link t t') ts
   end.
 
-
+Definition insert x heap := insTree (Node 0 x []) heap.
