@@ -1,5 +1,5 @@
 -R "." "PFDS"
-COQDOCFLAGS = "--light --utf8 --no-lib-name --lib-name '<img src=https://images-na.ssl-images-amazon.com/images/I/41XlPaC%2BZqL._SX326_BO1,204,203,200_.jpg />'"
+COQDOCFLAGS = "--light --utf8 --no-lib-name --lib-name '<img width=50px src=https://images-na.ssl-images-amazon.com/images/I/41XlPaC%2BZqL._SX326_BO1,204,203,200_.jpg />'"
 common/Result.v
 common/Ordered.v
 common/Power.v
