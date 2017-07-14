@@ -5,6 +5,7 @@ Open Scope list_scope.
 Require Import PFDS.common.Ordered.
 Require Import PFDS.common.Power.
 Require Import PFDS.common.Result.
+Require Import PFDS.common.Util.
 
 Declare Module Elem : Ordered.
   
@@ -86,10 +87,6 @@ Definition makeT x a b :=
   else T (1 + rank a) x b a.
 
 Require Import Recdef.
-
-Definition pair_size {A B : Set} size1 size2 (pair: A*B) :=
-  let '(x, y) := pair in
-  size1 x + size2 y.
 
 Function merge h1_h2 {measure (pair_size size size) h1_h2} :=
   match (h1_h2) with
