@@ -106,7 +106,8 @@ VFILES:=common/Result.v\
   common/Ordered.v\
   common/Power.v\
   2/BinaryTree.v\
-  3/LeftistHeap.v
+  3/LeftistHeap.v\
+  3/BinomialHeap.v
 
 ifneq ($(filter-out archclean clean cleanall printenv,$(MAKECMDGOALS)),)
 -include $(addsuffix .d,$(VFILES))
