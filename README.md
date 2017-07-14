@@ -22,10 +22,14 @@ PFDSのアルゴリズムをCoqで書きたい
 ## ビルド方法
 
 ```console
- $ make
+make
 ```
 
 
 ## ドキュメント
 
-http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/
+- 第二章
+    - [2.2 二分探索木](http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/PFDS.3.LeftistHeap.html))
+- 第三章
+    - [3.1 左偏ヒープ](http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/PFDS.3.LeftistHeap.html)
+- [索引](http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/index.html)
