@@ -29,7 +29,7 @@ make
 ## ドキュメント
 
 - 第二章
-    - [2.2 二分探索木](http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/PFDS.3.LeftistHeap.html))
+    - [2.2 二分探索木](http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/PFDS.2.BinaryTree.html)
 - 第三章
     - [3.1 左偏ヒープ](http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/PFDS.3.LeftistHeap.html)
 - [索引](http://pages.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/index.html)
