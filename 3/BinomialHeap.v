@@ -165,7 +165,16 @@ Lemma findMin'_correct_aux: forall t0 ts,
     Ok (fold_right Elem.min (root t0) (map root ts)) =
     (removeMinTree ((ts ++ [t0])%list) >>= fun '(tx, _) => Ok (root tx)).
 Proof.
-Admitted.
+ induction ts.
+ - now simpl.
+ - simpl. revert IHts. case_eq (removeMinTree (ts ++ [t0])%list); [|discriminate].
+   intros s_ss. destruct s_ss as [s ss]. simpl. intros eq IH. injection IH. intros IH'.
+   destruct (Elem.leq_dec (root a) (root s)).
+   + rewrite l. rewrite IH'. rewrite (Elem.min_l _ _ l). now destruct (ts ++ [t0])%list; simpl.
+   + rewrite IH'. rewrite Elem.min_r; [| now apply Elem.lt_le_incl].
+     apply Elem.lt_not_le in l. apply (Elem.leq_bool_correct_inv (root a) (root s)) in l.
+     rewrite l. now destruct (ts ++ [t0])%list; simpl.
+Qed.
 
 Theorem findMin'_correct: forall ts,
   findMin' ts = findMin ts.
