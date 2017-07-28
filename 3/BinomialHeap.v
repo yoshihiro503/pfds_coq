@@ -23,6 +23,11 @@ Declare Module Elem : Ordered.
 Inductive tree : Set :=
 | Node : nat -> Elem.T -> list tree -> tree.
 
+Definition rank t :=
+  match t with
+  | Node r _ _ => r
+  end.
+
 (**
    *** 二項木の具体例
    二項木の具体例は以下の通り
@@ -56,11 +61,6 @@ Definition link t1 t2 :=
    ランクが同じ二項木は存在しないものとする。
  *)
 Definition heap := list tree.
-
-Definition rank t :=
-  match t with
-  | Node r _ _ => r
-  end.
 
 (**
    *** [insert] の実装
