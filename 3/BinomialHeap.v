@@ -151,4 +151,13 @@ Definition deleteMin ts :=
   removeMinTree ts >>= fun '(Node _ x ts1, ts2) =>
   Ok (merge(List.rev ts1, ts2)).
 
+(**
+ ** 演習問題3.5
+   [removeMinTree]の呼び出しを経由せず、findMinを直接的に定義してみよう
+ *)
+Definition findMin' ts :=
+  ts
+  |> map root
+  |> reduce Elem.min
+.
 
