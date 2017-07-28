@@ -5,7 +5,7 @@ Module Type Ordered.
   Parameter leq_bool : T -> T -> bool.
 
   Definition leq x y := (leq_bool x y = true).
-  Definition lt x y  := leq x y /\ ~leq y x.
+  Definition lt x y  := leq x y /\ x <> y.
 
   Axiom eq_bool_correct : forall x y, eq_bool x y = true <-> x = y.
 
