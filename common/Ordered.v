@@ -28,6 +28,12 @@ Module Type Ordered.
   Axiom not_le : forall n m, ~ leq n m -> lt m n.
   Axiom lt_le_incl : forall n m, lt n m -> leq n m.
 
+  Definition leq_dec : forall x y, {leq x y} + {lt y x}.
+    intros x y. case_eq (leq_bool x y).
+    - intros eq. now left.
+    - intros eq. right. split.
+    Admitted.
+  
   Definition min x y := if eq_bool x y then x else y.
   Definition max x y := if eq_bool x y then y else x.
 End Ordered.
