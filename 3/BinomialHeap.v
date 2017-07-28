@@ -126,7 +126,7 @@ Definition root tree : Elem.T :=
  *)
 Fixpoint removeMinTree (h: heap) : Result (tree * heap) :=
   match h with
-  | [] => Error "removeMinTree: empty"
+  | [] => Error "empty"
   | [t] => Ok (t, [])
   | t :: ts =>
     removeMinTree ts >>= fun t'_ts' =>
