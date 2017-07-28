@@ -27,4 +27,7 @@ Module Type Ordered.
   Axiom le_trans : forall n m p, leq n m -> leq m p -> leq n p.
   Axiom not_le : forall n m, ~ leq n m -> lt m n.
   Axiom lt_le_incl : forall n m, lt n m -> leq n m.
+
+  Definition min x y := if eq_bool x y then x else y.
+  Definition max x y := if eq_bool x y then y else x.
 End Ordered.

@@ -135,4 +135,11 @@ Definition findMin ts : Result(Elem.T) :=
   removeMinTree ts >>= fun '(t, _) =>
   Ok (root t).
 
+(**
+   二項木の子要素[ts1]は二項ヒープとなっているはずなので、mergeできる。
+ *)
+Definition deleteMin ts :=
+  removeMinTree ts >>= fun '(Node _ x ts1, ts2) =>
+  Ok (merge(List.rev ts1, ts2)).
+
 
