@@ -1,4 +1,4 @@
-Require Import List Program Arith String.
+Require Import Program Arith String List.
 Require Import Recdef.
 Open Scope string_scope.
 Open Scope list_scope.
@@ -161,3 +161,24 @@ Definition findMin' ts :=
   |> reduce Elem.min
 .
 
+Lemma findMin'_correct_aux: forall t0 ts,
+    Ok (fold_right Elem.min (root t0) (map root ts)) =
+    (removeMinTree ((ts ++ [t0])%list) >>= fun '(tx, _) => Ok (root tx)).
+Proof.
+Admitted.
+
+Theorem findMin'_correct: forall ts,
+  findMin' ts = findMin ts.
+Proof.
+ destruct ts.
+ - now auto.
+ - unfold findMin, findMin', pipeline, reduce, reduce_right.
+   (* t::ts = us++[u] となるような us, uが存在する *)
+   cut (exists u us, t :: ts = (us ++ [u])%list).
+   + intros Exu. destruct Exu as [u Exus]. destruct Exus as [us eq]. rewrite eq at 2.
+     simpl. rewrite <- findMin'_correct_aux.
+     (*TODO: minの可換性、assoc,を使ってがんばる *)
+     admit.
+   + destruct (@List.exists_last tree (t::ts)) as [us Exu]; [discriminate|].
+     destruct Exu as [u  eq]. now exists u, us.
+Admitted.
