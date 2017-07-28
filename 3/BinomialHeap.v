@@ -52,6 +52,11 @@ Definition link t1 t2 :=
       Node (r+1) x2 (t1 :: c2)
   end.
 
+Inductive BinomialTree : tree -> Prop :=
+| BT_O: forall x, BinomialTree (Node 0 x [])
+| BT_S: forall r t1 t2, BinomialTree t1 -> BinomialTree t2 -> rank t1 = r -> rank t2 = r -> BinomialTree (link t1 t2)
+.
+
 (**
    ** 二項ヒープ(Binomial Heap)
  *)
@@ -61,6 +66,10 @@ Definition link t1 t2 :=
    ランクが同じ二項木は存在しないものとする。
  *)
 Definition heap := list tree.
+
+(*TODOソート済みと重複無しも
+Definition BinomialHeap ts : Prop := List.Forall BinomialTree ts.
+*)
 
 (**
    *** [insert] の実装
