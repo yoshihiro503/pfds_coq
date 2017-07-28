@@ -99,3 +99,40 @@ Proof.
   - simpl. now auto with arith.
   - simpl. now auto with arith.
 Defined.
+
+(**
+   *** [findMin], [deleteMin]の定義
+   *)
+
+(**
+   二項木から根っこの値をとる関数。この木の中に含まれる最小の値が取れるはず。
+ *)
+Definition root tree : Elem.T :=
+  let '(Node _ x _) := tree in x.
+
+(**
+   ヒープから最小のroot値を持つ木を抜き出して、その木と残ったヒープを組みで返す。
+   ヒープがからの場合を想定して[Result]型を返す
+   [map]と[fold]でもかける気がするが教科書に合わせて再帰で書いた。
+ *)
+Fixpoint removeMinTree (h: heap) : Result (tree * heap) :=
+  match h with
+  | [] => Error "removeMinTree: empty"
+  | [t] => Ok (t, [])
+  | t :: ts =>
+    removeMinTree ts >>= fun t'_ts' =>
+    let '(t', ts') := t'_ts' in
+    if Elem.leq_bool (root t) (root t') then
+      ret(t, ts)
+    else
+      ret(t', t::ts')
+  end.
+
+(**
+   ヒープに含まれる最小のElem.Tの値を返す
+ *)
+Definition findMin ts : Result(Elem.T) :=
+  removeMinTree ts >>= fun '(t, _) =>
+  Ok (root t).
+
+
