@@ -186,8 +186,10 @@ Proof.
    cut (exists u us, t :: ts = (us ++ [u])%list).
    + intros Exu. destruct Exu as [u Exus]. destruct Exus as [us eq]. rewrite eq at 2.
      simpl. rewrite <- findMin'_correct_aux.
-     (*TODO: minの可換性、assoc,を使ってがんばる *)
-     admit.
+     f_equal. apply Util.fold_right_cons_tail.
+     * apply Elem.min_assoc.
+     * apply Elem.min_comm.
+     * rewrite <- map_cons. rewrite eq. now rewrite map_app.
    + destruct (@List.exists_last tree (t::ts)) as [us Exu]; [discriminate|].
      destruct Exu as [u  eq]. now exists u, us.
-Admitted.
+Qed.
