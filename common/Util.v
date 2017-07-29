@@ -33,12 +33,30 @@ Proof.
  apply List.fold_right_app.
 Qed.
 
+(** proved by erutuf : https://gist.github.com/erutuf/123da543af0d6b19ae53bb7e8ccf8b81*)
+Lemma fold_right_ext : forall (A : Type)(f g : A -> A -> A) xs x0,
+  (forall x y, f x y = g x y) ->
+  fold_right f x0 xs = fold_right g x0 xs.
+Proof with simpl in *.
+  intros.
+  induction xs; [auto|]...
+  rewrite H.
+  rewrite IHxs.
+  reflexivity.
+Qed.
+
+(** proved by erutuf : https://gist.github.com/erutuf/123da543af0d6b19ae53bb7e8ccf8b81*)
 Lemma fold_right_rev : forall (A: Type) (f: A -> A -> A) xs x0,
   (forall x y z, f x (f y z) = f (f x y) z) ->
   (forall x y, f x y = f y x) ->
-  List.fold_right f x0 xs = List.fold_right f x0 (List.rev xs).
+List.fold_right f x0 xs = List.fold_right f x0 (List.rev xs).
 Proof.
-Admitted.
+  intros.
+  rewrite (fold_right_ext _ f (fun x y => f y x)) by auto.
+  rewrite <- fold_symmetric; [|auto..].
+  rewrite fold_left_rev_right.
+  reflexivity.
+Qed.
 
 Lemma fold_right_cons_tail : forall (A:Type) (f: A -> A -> A) x xs y ys,
   (forall x y z, f x (f y z) = f (f x y) z) ->
