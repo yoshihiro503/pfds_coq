@@ -40,4 +40,7 @@ Module Type Ordered.
 
   Axiom min_l : forall n m, leq n m -> min n m = n.
   Axiom min_r : forall n m, leq m n -> min n m = m.
+  Axiom min_assoc: forall m n p, min m (min n p) = min (min m n) p.
+  Axiom min_comm: forall n m, min n m = min m n.
+
 End Ordered.
