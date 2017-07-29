@@ -25,10 +25,13 @@ Definition reduce_left {A: Type} (f: A -> A -> A) (xs: list A) : Result A :=
 
 Definition reduce {A: Type} := @reduce_right A.
 
+ (** proved by chiguri : https://gist.github.com/chiguri/c10948810668490787c5f985f42955bd *)
 Lemma fold_right_tail : forall (A B: Type) (f: A -> B -> B) xs x b0,
   List.fold_right f b0 (xs ++ [x]) = List.fold_right f (f x b0) xs.
 Proof.
-Admitted.
+ intros.
+ apply List.fold_right_app.
+Qed.
 
 Lemma fold_right_rev : forall (A: Type) (f: A -> A -> A) xs x0,
   (forall x y z, f x (f y z) = f (f x y) z) ->
