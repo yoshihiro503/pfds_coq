@@ -193,3 +193,55 @@ Proof.
    + destruct (@List.exists_last tree (t::ts)) as [us Exu]; [discriminate|].
      destruct Exu as [u  eq]. now exists u, us.
 Qed.
+
+(**
+ ** 演習問題3.6
+
+    https://dwango.slack.com/archives/C0CJRPYU8/p1501238725206210
+
+    treeの代わりにheapでrankを持ったらどうなるかっていうこと
+
+    (treeのノードで持つ代わりに,heapの中で [(rank, tree)] のタプルリストみたいにして持つようにする。)
+<<
+    link: (rank * tree) -> (rank * tree) -> (rank * tree) のような型になる
+    insTree: (rank * tree) -> heap -> heap
+    merge : heap -> heap -> heap だから型は変わらない。
+>>
+    removeMinTree とか findMin とかはもうrank関係ないからこのままで。
+
+    link, insTree, insert, mergeの実装を修正すればよさそう
+ *)
+
+
+(**
+ ** 演習問題3.7
+
+    https://dwango.slack.com/archives/C0CJRPYU8/p1501240301621876
+
+    例えばinsertはScalaで次のような感じかな:
+<<
+    def insert (x: Elem.T, h: Heap) = {
+      h match {
+        case E => NE(x, H.singleton(x))
+        case NE(m, ih) =>
+          NE(min(m, x), H.insert(x, ih))
+      }
+    }
+>>
+    mergeなども同様にできそう。
+    
+    `NE(x, ih)` で `ih`の中に `x` を含まない流派 (a.mutake派)と 含む派 (y.oshihiro503派) がある。(上記は含む派)
+ *)
+
+(**
+ ** 3.2節まとめ
+
+<<
+insert : O(log n)
+merge: O(log n)
+findMin: O(log n)
+deleteMin: O(log n)
+>>
+
+ただし、ちょっとした拡張でfindMinはO(1)にできる (ExplicitMinファンクタ)
+ *)
