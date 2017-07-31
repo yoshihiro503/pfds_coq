@@ -2,7 +2,9 @@
 COQDOCFLAGS = "--light --utf8 --no-lib-name --lib-name '<img width=50px src=https://images-na.ssl-images-amazon.com/images/I/41XlPaC%2BZqL._SX326_BO1,204,203,200_.jpg />'"
 common/Util.v
 common/Result.v
-common/Ordered.v
+common/DecidableEq.v
+common/TotalOrder.v
+common/DecidableOrder.v
 common/Power.v
 2/BinaryTree.v
 3/LeftistHeap.v

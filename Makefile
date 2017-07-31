@@ -104,7 +104,9 @@ endif
 
 VFILES:=common/Util.v\
   common/Result.v\
-  common/Ordered.v\
+  common/DecidableEq.v\
+  common/TotalOrder.v\
+  common/DecidableOrder.v\
   common/Power.v\
   2/BinaryTree.v\
   3/LeftistHeap.v\
