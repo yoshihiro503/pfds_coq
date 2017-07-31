@@ -29,12 +29,24 @@ Module Type Ordered.
   Axiom lt_not_le : forall n m, lt n m -> ~ leq m n.
   Axiom lt_le_incl : forall n m, lt n m -> leq n m.
 
+  Definition eq_dec : forall (x y: T), {x = y} + {x <> y}.
+    intros x y. case_eq (eq_bool x y).
+    - intros eq. admit.
+    - intros eq. admit.
+    Admitted.
+
   Definition leq_dec : forall x y, {leq x y} + {lt y x}.
     intros x y. case_eq (leq_bool x y).
     - intros eq. now left.
     - intros eq. admit.
     Admitted.
-  
+
+  Definition lt_dec : forall x y, {lt x y} + {~lt x y}.
+    intros x y. case_eq (lt_bool x y).
+    - intros eq. admit.
+    - intros eq. admit.
+    Admitted.
+
   Definition min x y := if eq_bool x y then x else y.
   Definition max x y := if eq_bool x y then y else x.
 
@@ -43,4 +55,9 @@ Module Type Ordered.
   Axiom min_assoc: forall m n p, min m (min n p) = min (min m n) p.
   Axiom min_comm: forall n m, min n m = min m n.
 
+  Module Op.
+    Infix "=?" := eq_dec (at level 70).
+    Infix "<=?" := leq_dec (at level 70).
+    Infix "<?" := lt_dec (at level 70).
+  End Op.
 End Ordered.
