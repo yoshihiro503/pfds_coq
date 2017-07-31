@@ -4,10 +4,7 @@ Require Import PFDS.common.Ordered.
 Module UnbalancedSet (Element : Ordered).
 
   Definition Elem := Element.T.
-
-  Infix "=?" := Element.eq_bool (at level 60).
-  Infix "<?" := Element.lt_bool (at level 60).
-  Infix ">?" := (fun x y => y <? x) (at level 60).
+  Import Element.Op.
 
   Infix "<" := Element.lt.
   Infix "<=" := Element.leq.
@@ -58,12 +55,12 @@ Module UnbalancedSet (Element : Ordered).
   Proof.
     intros x tree HOrdered. induction HOrdered.
     - discriminate.
-    - simpl. case_eq (x <? x0); intro Hlt_bool.
+    - simpl. destruct (x <? x0).
       + intros HLeft. apply IHHOrdered1 in HLeft. now apply MemberBranchLeft.
-      + case_eq (x0 <? x); intro Hgt_bool.
+      + destruct (x0 <? x).
         * intros HRight. apply IHHOrdered2 in HRight. now apply MemberBranchRight.
         * intros _. cutrewrite (x = x0); [now constructor|].
-          apply Element.Antisymmetric; admit.
+          admit.
   Admitted.
 
   Fixpoint insert x tree :=
@@ -91,8 +88,7 @@ Module UnbalancedSet (Element : Ordered).
   Proof.
     intros x t. induction t as[| a IHa y b IHb]; intros cand.
     - simpl. destruct cand; [|discriminate].
-      case_eq (x =? t); [| discriminate]. rewrite Element.eq_bool_correct.
-      intros Heq _. subst. now right.
+      destruct (x =? t); [| discriminate]. subst. now right.
     - simpl. destruct (x <? y).
       + (* x<y のとき *)
         intros HLeft. apply IHa in HLeft. destruct HLeft; [left| now right]. now constructor.
@@ -115,23 +111,23 @@ Module UnbalancedSet (Element : Ordered).
     (* Member の導出木に関する帰納法 *)
     intros x t cand HOrdered Hmem. revert cand. induction Hmem as [| x y a b | x y a b]; intros cand.
     - (* x = y のとき *)
-      simpl. case_eq (x <? x); intros Hxlt.
-      + apply Element.lt_bool_correct in Hxlt. now destruct (Element.lt_irrefl x).
+      simpl. destruct (x <? x) as [Hxlt|Hxlt].
+      + now destruct (Element.lt_irrefl x).
       + apply member_aux_complete_1.
         * now inversion HOrdered.
         * inversion HOrdered. subst.
           eapply TreeForall_impl; [|exact H5]. intros e. simpl. unfold Element.lt. tauto.
     - (* Member x a *)
       inversion HOrdered. subst.
-      simpl. case_eq (x <? y); intros Hltxy; [now apply IHHmem | ].
+      simpl. destruct (x <? y) as [Hltxy|Hltxy]; [now apply IHHmem | ].
       (* 以降は前提が矛盾するパターン: Hmemよりx < y となるはず、 Hltxyよりy<=xとなる,両者は矛盾 *)
-      clear H3 H5. apply Element.lt_bool_correct_inv in Hltxy. destruct Hltxy.
+      clear H3 H5. destruct Hltxy.
       now apply (Member_Forall (fun x1 => x1 < y) x a).
     - (* Member x b *)
       inversion HOrdered. subst.
-      simpl. case_eq (x <? y); intros Hltxy; [|now apply IHHmem].
+      simpl. destruct (x <? y) as [Hltxy|Hltxy]; [|now apply IHHmem].
       (* 以降は前提が矛盾するパターン: Hmemよりy < x となるはず、 Hltxyよりx<yとなる,両者は矛盾 *)
-      clear H2 H4. apply Element.lt_bool_correct in Hltxy.
+      clear H2 H4.
       destruct (Element.lt_asymm x y Hltxy). now apply (Member_Forall (fun x2 => y < x2) _ b).
   Qed.
 

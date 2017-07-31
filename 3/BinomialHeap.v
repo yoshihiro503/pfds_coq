@@ -9,6 +9,7 @@ Require Import PFDS.common.Result.
 
 
 Declare Module Elem : Ordered.
+Import Elem.Op.
 
 (**
    ** 二項木(Binomial Tree)
@@ -80,7 +81,7 @@ Fixpoint insTree t heap :=
   match heap with
   | [] => [t]
   | t' :: ts =>
-    if rank t <? rank t' then
+    if (rank t <? rank t')%nat then
       t :: ts
     else
       insTree(link t t') ts
@@ -96,9 +97,9 @@ Function merge ts1_ts2 {measure (pair_size (@List.length tree) (@List.length tre
   | (ts1, []) => ts1
   | ([], ts2) => ts2
   | (t1 :: ts1' as ts1, t2 :: ts2' as ts2) =>
-    if rank t1 <? rank t2 then
+    if (rank t1 <? rank t2)%nat then
       t1 :: merge (ts1', ts2)
-    else if rank t2 <? rank t1 then
+    else if (rank t2 <? rank t1)%nat then
       t2 :: merge (ts1, ts2')
     else
       insTree (link t1 t2) (merge (ts1', ts2'))
@@ -131,7 +132,7 @@ Fixpoint removeMinTree (h: heap) : Result (tree * heap) :=
   | t :: ts =>
     removeMinTree ts >>= fun t'_ts' =>
     let '(t', ts') := t'_ts' in
-    if Elem.leq_bool (root t) (root t') then
+    if root t <=? root t' then
       ret(t, ts)
     else
       ret(t', t::ts')
@@ -170,10 +171,9 @@ Proof.
  - simpl. revert IHts. case_eq (removeMinTree (ts ++ [t0])%list); [|discriminate].
    intros s_ss. destruct s_ss as [s ss]. simpl. intros eq IH. injection IH. intros IH'.
    destruct (Elem.leq_dec (root a) (root s)).
-   + rewrite l. rewrite IH'. rewrite (Elem.min_l _ _ l). now destruct (ts ++ [t0])%list; simpl.
-   + rewrite IH'. rewrite Elem.min_r; [| now apply Elem.lt_le_incl].
-     apply Elem.lt_not_le in l. apply (Elem.leq_bool_correct_inv (root a) (root s)) in l.
-     rewrite l. now destruct (ts ++ [t0])%list; simpl.
+   + rewrite IH'. rewrite (Elem.min_l _ _ l). now destruct (ts ++ [t0])%list; simpl.
+   + rewrite IH'. rewrite Elem.min_r; [| now apply Elem.lt_le_incl, Elem.not_le_lt].
+     now destruct (ts ++ [t0])%list; simpl.
 Qed.
 
 Theorem findMin'_correct: forall ts,

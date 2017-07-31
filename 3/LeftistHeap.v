@@ -8,6 +8,7 @@ Require Import PFDS.common.Result.
 Require Import PFDS.common.Util.
 
 Declare Module Elem : Ordered.
+Import Elem.Op.
   
 Inductive heap : Set :=
 | E : heap
@@ -248,13 +249,13 @@ Proof.
     apply makeT_Heap; [assumption| now apply IH|assumption|].
     apply merge_Forall. split; [assumption |].
     eapply HeapForall_impl; [|now apply H12]. simpl. intros elem Helem.
-    now apply (Elem.le_trans _ y).
+    apply (Elem.le_trans _ y); [|assumption]. now apply Elem.leq_bool_correct.
   - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq Hleq IH Hh1 Hh2.
     inversion Hh1. inversion Hh2. subst.
     inversion H5. inversion H12. subst.
     apply makeT_Heap; [assumption| now apply IH|assumption|].
     apply merge_Forall. split; [| assumption].
-    rewrite Elem.leq_bool_correct_inv in Hleq. apply Elem.not_le in Hleq. apply Elem.lt_le_incl in Hleq.
+    rewrite Elem.leq_bool_correct_inv in Hleq. apply Elem.not_le_lt in Hleq. apply Elem.lt_le_incl in Hleq.
     constructor.
     + eapply HeapForall_impl; [ |now apply H3]. simpl. intros elem Helem.
       now apply (Elem.le_trans _ x).
