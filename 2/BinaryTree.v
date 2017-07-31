@@ -1,13 +1,11 @@
 Require Import Setoid.
-Require Import PFDS.common.Ordered.
+Require Import PFDS.common.DecidableOrder.
 
-Module UnbalancedSet (Element : Ordered).
+Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
 
+  Module Element := DecidableOrder.Make(ElementSeed).
   Definition Elem := Element.T.
   Import Element.Op.
-
-  Infix "<" := Element.lt.
-  Infix "<=" := Element.leq.
 
   Inductive Tree : Type :=
   | E : Tree
@@ -112,11 +110,11 @@ Module UnbalancedSet (Element : Ordered).
     intros x t cand HOrdered Hmem. revert cand. induction Hmem as [| x y a b | x y a b]; intros cand.
     - (* x = y のとき *)
       simpl. destruct (x <? x) as [Hxlt|Hxlt].
-      + now destruct (Element.lt_irrefl x).
+      + now destruct (Element.Ord.lt_irrefl x).
       + apply member_aux_complete_1.
         * now inversion HOrdered.
         * inversion HOrdered. subst.
-          eapply TreeForall_impl; [|exact H5]. intros e. simpl. unfold Element.lt. tauto.
+          eapply TreeForall_impl; [|exact H5]. intros e. simpl. unfold Element.Ord.lt. tauto.
     - (* Member x a *)
       inversion HOrdered. subst.
       simpl. destruct (x <? y) as [Hltxy|Hltxy]; [now apply IHHmem | ].
@@ -128,7 +126,7 @@ Module UnbalancedSet (Element : Ordered).
       simpl. destruct (x <? y) as [Hltxy|Hltxy]; [|now apply IHHmem].
       (* 以降は前提が矛盾するパターン: Hmemよりy < x となるはず、 Hltxyよりx<yとなる,両者は矛盾 *)
       clear H2 H4.
-      destruct (Element.lt_asymm x y Hltxy). now apply (Member_Forall (fun x2 => y < x2) _ b).
+      destruct (Element.Ord.lt_asymm x y Hltxy). now apply (Member_Forall (fun x2 => y < x2) _ b).
   Qed.
 
   Lemma member_aux_complete : forall x t cand,

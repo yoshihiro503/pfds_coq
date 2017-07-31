@@ -4,10 +4,11 @@ Open Scope string_scope.
 Open Scope list_scope.
 
 Require Import PFDS.common.Util.
-Require Import PFDS.common.Ordered.
+Require Import PFDS.common.DecidableOrder.
 Require Import PFDS.common.Result.
 
-Declare Module Elem : Ordered.
+Declare Module Seed : DecidableOrder.Seed.
+Module Elem := DecidableOrder.Make(Seed).
 Import Elem.Op.
 
 (**

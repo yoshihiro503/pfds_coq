@@ -4,11 +4,11 @@ Open Scope string_scope.
 Open Scope list_scope.
 
 Require Import PFDS.common.Util.
-Require Import PFDS.common.Ordered.
+Require Import PFDS.common.DecidableOrder.
 Require Import PFDS.common.Result.
 
-
-Declare Module Elem : Ordered.
+Declare Module Seed : DecidableOrder.Seed.
+Module Elem := DecidableOrder.Make(Seed).
 Import Elem.Op.
 
 (**
@@ -172,7 +172,7 @@ Proof.
    intros s_ss. destruct s_ss as [s ss]. simpl. intros eq IH. injection IH. intros IH'.
    destruct (Elem.leq_dec (root a) (root s)).
    + rewrite IH'. rewrite (Elem.min_l _ _ l). now destruct (ts ++ [t0])%list; simpl.
-   + rewrite IH'. rewrite Elem.min_r; [| now apply Elem.lt_le_incl, Elem.not_le_lt].
+   + rewrite IH'. rewrite Elem.min_r; [| now apply Elem.Ord.lt_le_incl, Elem.Ord.not_le_lt].
      now destruct (ts ++ [t0])%list; simpl.
 Qed.
 

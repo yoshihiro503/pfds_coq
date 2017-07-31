@@ -38,6 +38,7 @@ Module Make(S : Seed).
   Qed.
 
   Module Op.
+    Include Ord.Op.
     Infix "=?" := DecEq.eq_dec (at level 70).
     Infix "<=?" := leq_dec (at level 70).
     Infix "<?" := lt_dec (at level 70).

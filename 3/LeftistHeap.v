@@ -2,12 +2,13 @@ Require Import List Program Arith String.
 Open Scope string_scope.
 Open Scope list_scope.
 
-Require Import PFDS.common.Ordered.
+Require Import PFDS.common.DecidableOrder.
 Require Import PFDS.common.Power.
 Require Import PFDS.common.Result.
 Require Import PFDS.common.Util.
 
-Declare Module Elem : Ordered.
+Declare Module Seed : DecidableOrder.Seed.
+Module Elem := DecidableOrder.Make(Seed).
 Import Elem.Op.
   
 Inductive heap : Set :=
@@ -50,11 +51,11 @@ Fixpoint size(h : heap) :=
 Inductive Leftist : heap -> Prop :=
 | LeftistE : Leftist E
 | LeftistT : forall a b r x,
-    calc_rank b <= calc_rank a -> Leftist a -> Leftist b -> Leftist (T r x a b).
+    (calc_rank b <= calc_rank a)%nat -> Leftist a -> Leftist b -> Leftist (T r x a b).
 
 (** ** Exercise 3.1 *)
 
-Lemma ex3_1_aux : forall t, Leftist t -> 2 ^^ (calc_rank t) <= size t + 1.
+Lemma ex3_1_aux : forall t, Leftist t -> (2 ^^ (calc_rank t) <= size t + 1)%nat.
 Proof.
   induction t as[| r x a IHa b IHb].
   - reflexivity.
@@ -225,12 +226,12 @@ Qed.
 
 Inductive Heap : heap -> Prop :=
 | HeapE : Heap E
-| HeapT : forall r x a b, Heap a -> Heap b -> HeapForall (fun elem => Elem.leq x elem) (T r x a b) -> Heap (T r x a b).
+| HeapT : forall r x a b, Heap a -> Heap b -> HeapForall (fun elem => x <= elem) (T r x a b) -> Heap (T r x a b).
 
 Lemma makeT_Heap : forall x a b,
     Heap a -> Heap b ->
-    HeapForall (fun elem => Elem.leq x elem) a ->
-    HeapForall (fun elem => Elem.leq x elem) b ->
+    HeapForall (fun elem => x <= elem) a ->
+    HeapForall (fun elem => x <= elem) b ->
     Heap (makeT x a b).
 Proof.
 Admitted.
@@ -249,18 +250,18 @@ Proof.
     apply makeT_Heap; [assumption| now apply IH|assumption|].
     apply merge_Forall. split; [assumption |].
     eapply HeapForall_impl; [|now apply H12]. simpl. intros elem Helem.
-    apply (Elem.le_trans _ y); [|assumption]. now apply Elem.leq_bool_correct.
+    apply (Elem.Ord.le_trans _ y); [|assumption]. now apply Elem.leq_bool_correct.
   - simpl. intros h1_h2 _r1 x a1 b1 _r2 y a2 b2 Heq Hleq IH Hh1 Hh2.
     inversion Hh1. inversion Hh2. subst.
     inversion H5. inversion H12. subst.
     apply makeT_Heap; [assumption| now apply IH|assumption|].
     apply merge_Forall. split; [| assumption].
-    rewrite Elem.leq_bool_correct_inv in Hleq. apply Elem.not_le_lt in Hleq. apply Elem.lt_le_incl in Hleq.
+    rewrite Elem.leq_bool_correct_inv in Hleq. apply Elem.Ord.not_le_lt in Hleq. apply Elem.Ord.lt_le_incl in Hleq.
     constructor.
     + eapply HeapForall_impl; [ |now apply H3]. simpl. intros elem Helem.
-      now apply (Elem.le_trans _ x).
+      now apply (Elem.Ord.le_trans _ x).
     + eapply HeapForall_impl; [ |now apply H7]. simpl. intros elem Helem.
-      now apply (Elem.le_trans _ x).
+      now apply (Elem.Ord.le_trans _ x).
     + assumption.
 Qed.
 
