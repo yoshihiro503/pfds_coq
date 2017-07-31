@@ -8,6 +8,7 @@ Require Import PFDS.common.Ordered.
 Require Import PFDS.common.Result.
 
 Declare Module Elem : Ordered.
+Import Elem.Op.
 
 (**
  ** 赤黒木(Red Black Tree)
@@ -61,3 +62,31 @@ Inductive RedBlackWithLength : nat -> tree -> Prop :=
 >>
  *)
 
+(**
+ ** insertの定義
+ *)
+
+Definition balance color t1 e t2 :=
+  match (color, t1, e, t2) with
+  | (黒, T 赤 (T 赤 a x b) y c, z, d)
+  | (黒, T 赤 a x (T 赤 b y c), z, d)
+  | (黒, a, x, T 赤 (T 赤 b y c) z d)
+  | (黒, a, x, T 赤 b y (T 赤 c z d))
+      => T 赤 (T 黒 a x b) y (T 黒 c z d)
+  | _ => T color t1 e t2
+  end.
+
+Fixpoint ins x s :=
+  match s with
+  | E => T 赤 E x E
+  | T color a y b =>
+    if x <? y then balance color (ins x a) y b
+    else if y <? x then balance color a y (ins x b)
+    else s
+  end.
+
+Definition insert (x: Elem.T) (s: tree) : tree :=
+  match ins x s with
+  | T _ a y b => T 黒 a y b
+  | E => E (* 本来ここには来得ないパターン *)
+  end.
