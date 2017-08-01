@@ -105,7 +105,7 @@ Definition insert (x: Elem.T) (s: tree) : tree :=
   | E => E (* 本来ここには来得ないパターン *)
   end.
 
-(*Functional Scheme ins_ind := Induction for ins Sort Prop.*)
+Functional Scheme ins_ind := Induction for ins Sort Prop.
 
 Lemma balance_aux : forall (P : (color*tree*Elem.T*tree) -> tree -> Prop),
   (forall col t1 e t2 a b c d x y z,
@@ -149,4 +149,28 @@ Proof.
   - inversion H3. inversion H5. inversion H9.  subst. constructor; now constructor.
   - inversion H3. inversion H5. inversion H11. subst. constructor; now constructor.
   - assumption.
+Qed.
+
+Lemma ins_Balanced : forall n x t,
+    BalancedWithLength n t -> BalancedWithLength n (ins x t).
+Proof.
+  intros n x t. revert n. apply ins_ind.
+  - (* t = Eのとき *)
+    intros _ _ n HBt. inversion HBt. constructor; now constructor.
+  - (* x < y のとき *)
+    intros _ col a y b _ Hlt _ IHa n HBt.
+    apply balance_Balanced. inversion HBt; subst.
+    + (* 赤のとき *)
+      constructor; now auto.
+    + (* 黒のとき *)
+      constructor; now auto.
+  - (* y < x のとき *)
+    intros _ col a y b _ _ _ Hlt _ IHb n HBt.
+    apply balance_Balanced. inversion HBt; subst.
+    + (* 赤のとき *)
+      constructor; now auto.
+    + (* 黒のとき *)
+      constructor; now auto.
+  - (* ~x < y かつ ~y < x のとき (すなわち x = y) *)
+    intros s col a y b eq Hnotlt1 _ Hnotlt2 _ n HBt. subst. assumption.
 Qed.
