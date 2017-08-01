@@ -108,23 +108,19 @@ Definition insert (x: Elem.T) (s: tree) : tree :=
 Functional Scheme ins_ind := Induction for ins Sort Prop.
 
 Lemma balance_aux : forall (P : (color*tree*Elem.T*tree) -> tree -> Prop),
-  (forall col t1 e t2 a b c d x y z,
-      col = 黒 -> t1 = T 赤 (T 赤 a x b) y c -> e = z -> t2 = d -> P (col,t1,e,t2) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
-  (forall col t1 e t2 a b c d x y z,
-      col = 黒 -> t1 = T 赤 a x (T 赤 b y c) -> e = z -> t2 = d -> P (col,t1,e,t2) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
-  (forall col t1 e t2 a b c d x y z,
-      col = 黒 -> t1 = a -> e = x -> t2 = T 赤 (T 赤 b y c) z d -> P (col,t1,e,t2) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
-  (forall col t1 e t2 a b c d x y z,
-      col = 黒 -> t1 = a -> e = x -> t2 = T 赤 b y (T 赤 c z d) -> P (col,t1,e,t2) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
+  (forall a b c d x y z,
+      P (黒, T 赤 (T 赤 a x b) y c, z, d) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
+  (forall a b c d x y z,
+      P (黒, T 赤 a x (T 赤 b y c), z, d) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
+  (forall a b c d x y z,
+      P (黒, a, x, T 赤 (T 赤 b y c) z d) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
+  (forall a b c d x y z,
+      P (黒, a, x, T 赤 b y (T 赤 c z d)) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
   (forall col t1 e t2, P (col,t1,e,t2) (T col t1 e t2)) ->
   forall col t1 e t2, P (col,t1,e,t2) (balance col t1 e t2).
 Proof.
  intros P H1 H2 H3 H4 Hother col t1 e t2.
  set (Hother col t1 e t2).
- set (H1 col t1 e t2) as H1'.
- set (H2 col t1 e t2) as H2'.
- set (H3 col t1 e t2) as H3'.
- set (H4 col t1 e t2) as H4'.
  destruct col; [now auto|].
  (destruct t1 as [|c1 t11 x1 t12]; [|destruct c1;
                                      (destruct t11 as [|c11 t11_1 x11 t11_2]; [|destruct c11]);
@@ -144,10 +140,10 @@ Proof.
   apply (balance_aux (fun '(col,t1,e,t2) t =>
                     BalancedWithLength n (T col t1 e t2)->BalancedWithLength n t));
     intros; subst.
-  - inversion H3. inversion H2. inversion H9.  subst. constructor; now constructor.
-  - inversion H3. inversion H2. inversion H11. subst. constructor; now constructor.
-  - inversion H3. inversion H5. inversion H9.  subst. constructor; now constructor.
-  - inversion H3. inversion H5. inversion H11. subst. constructor; now constructor.
+  - inversion H. inversion H3. inversion H9.  subst. constructor; now constructor.
+  - inversion H. inversion H3. inversion H11. subst. constructor; now constructor.
+  - inversion H. inversion H5. inversion H9.  subst. constructor; now constructor.
+  - inversion H. inversion H5. inversion H11. subst. constructor; now constructor.
   - assumption.
 Qed.
 
