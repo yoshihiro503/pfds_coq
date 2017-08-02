@@ -3,6 +3,10 @@ Require Import PFDS.common.DecidableOrder.
 
 Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
 
+  (**
+   * 2.2 二分探索木
+   *)
+
   Module Element := DecidableOrder.Make(ElementSeed).
   Definition Elem := Element.T.
   Import Element.Op.
@@ -21,9 +25,19 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
   Proof.
   Admitted.
 
+  (**
+     二分木の要素が対象順(symmetric order)で格納されているということを示す[Prop]。
+     「対象順とは任意の与えられたノードの要素が、その左側の部分木の中のどの要素よりも大きく、
+     右側の部分木のどの要素よりも小さい、という意味である」
+   *)
+
   Inductive Ordered : Tree -> Prop :=
   | OrderedE : Ordered E
   | OrderedT : forall x t1 t2, Ordered t1 -> Ordered t2 -> TreeForall (fun x1 => x1 < x) t1 -> TreeForall(fun x2 => x < x2) t2 -> Ordered (T t1 x t2).
+
+  (**
+     二分木に要素が含まれていることを示す[Prop]。
+   *)
 
   Inductive Member : Elem -> Tree -> Prop :=
   | MemberRoot : forall x t1 t2, Member x (T t1 x t2)
@@ -39,6 +53,9 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
     - inversion HForall. now apply IHHMem.
   Qed.
 
+  (**
+     [member]の実装
+   *)
   Fixpoint member x tree :=
     match tree with
     | E => false
@@ -61,6 +78,9 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
           admit.
   Admitted.
 
+  (**
+     [insert]の実装
+   *)
   Fixpoint insert x tree :=
     match tree with
     | E => T E x E
