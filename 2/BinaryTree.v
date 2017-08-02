@@ -70,6 +70,17 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
       else s
     end.
 
+  (**
+   ** 演習問題 2.2 (p. 22)
+
+      member関数を改良して、[lt]の回数が木の深さ[d]に対して[d+1]回になるようにせよ。
+   *)
+
+  (**
+   *** 関数の実装
+
+       [member2]という名前で実装する。
+   *)
   Fixpoint member2_aux x tree candidate :=
     match (tree, candidate) with
     | (E, None) => false
@@ -81,6 +92,12 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
     end.
   Definition member2 x tree := member2_aux x tree None.
 
+  (**
+   *** 証明
+
+       [member2]が元の[member]と同様の性質を満たしているかどうかを証明する。
+       [member2_aux]で第3引数にくる[cand]が[x]を超えないことを保ったままだんだん大きくなることを考慮して補題をたてる。
+   *)
   Lemma member2_aux_sound : forall x t cand,
       member2_aux x t cand = true -> Member x t \/ cand = Some x.
   Proof.
@@ -100,7 +117,7 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
       Ordered t -> TreeForall (fun e => x <= e) t ->
       member2_aux x t (Some x) = true.
   Proof.
-  Admitted.    
+  Admitted.
 
   Lemma member_aux_complete_2 : forall x t cand,
       Ordered t ->
@@ -137,20 +154,30 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
     - now apply member_aux_complete_2.
     - destruct H. subst. now apply member_aux_complete_1.
   Qed.
-    
+
+  (**
+      [member2]関数の結果が[true]ならば性質[Member]を満たす。
+   *)
   Theorem member2_sound : forall x t,
       member2 x t = true -> Member x t.
   Proof.
     unfold member2. intros x t Hmem. apply member2_aux_sound in Hmem. now destruct Hmem.
   Qed.
 
+  (**
+      性質[Member]を満たすならば[member2]関数の結果が[true]となる。
+   *)
   Theorem member2_complete : forall x t,
       Ordered t ->
       Member x t -> member2 x t = true.
   Proof.
     intros x t HOrdered H. unfold member2. now apply member_aux_complete; [| now left].
   Qed.
-  
+
+
+  (**
+   ** 演習問題 2.5
+   *)
   Fixpoint complete x d :=
     match d with
     | O => E
@@ -179,9 +206,6 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
     | O => (E, T E x E)
     | S p =>
       l
-*)  
-    
+*)
+
 End UnbalancedSet.
-
-
-
