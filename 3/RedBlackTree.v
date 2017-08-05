@@ -213,6 +213,61 @@ Proof.
       now inversion 1.
 Qed.
 
+Lemma balance_Colored : forall col a y b col0 t1 e t2,
+  (WellColored a /\ WellColored b) \/
+    ((exists col_a a1 x a2, a = T col_a a1 x a2 /\ WellColored a1 /\ WellColored a2 /\
+                            IsRootBlack a1 /\ IsRootBlack a2) /\ WellColored b) \/
+    (WellColored a /\ (exists col_b b1 x b2, b = T col_b b1 x b2 /\ WellColored b1 /\
+                                             WellColored b2 /\ IsRootBlack b1 /\ IsRootBlack b2)) ->
+  balance col a y b = T col0 t1 e t2 ->
+  WellColored t1 /\ WellColored t2.
+Proof.
+  intros col a y b col0 t1 e t2 HC.
+  apply (balance_aux (fun '(col', a', y', b') t => balance col' a' y' b' = t ->
+                                                   col'=col/\a'=a/\y'=y/\b'=b ->
+    t = T col0 t1 e t2 -> WellColored t1 /\ WellColored t2)).
+  - (* もみほぐしが起きるとき その1 *)
+    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
+    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
+    + inversion HCa. split; [|now constructor]. inversion H2. now constructor.
+    + destruct HCa as [col_a [a1 [x [a2 [Heq2 [HCa1 [HCa2 [_ _]]]]]]]]. inversion Heq2. subst.
+      split; [|now constructor]. inversion HCa1. now constructor.
+    + now inversion HCa.
+  - (* もみほぐしが起きるとき その2 *)
+    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
+    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
+    + inversion HCa. inversion H3. split; now constructor.
+    + destruct HCa as [col_a [a1 [x [a2 [Heq2 [HCa1 [HCa2 [_ _]]]]]]]]. inversion Heq2. subst.
+      inversion HCa2. split; now constructor.
+    + now inversion HCa.
+  - (* もみほぐしが起きるとき その3 *)
+    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
+    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
+    + inversion HCb. inversion H2. split; now constructor.
+    + now inversion HCb.
+    + destruct HCb as [col_b [b1 [x [b2 [Heq2 [HCb1 [HCb2 [_ _]]]]]]]]. inversion Heq2. subst.
+      inversion HCb1. split; now constructor.
+  - (* もみほぐしが起きるとき その4 *)
+    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
+    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
+    + inversion HCb. inversion H3. split; now constructor.
+    + now inversion HCb.
+    + destruct HCb as [col_b [b1 [x [b2 [Heq2 [HCb1 [HCb2 [_ _]]]]]]]]. inversion Heq2. subst.
+      inversion HCb2. split; now constructor.
+  - (* もみほぐしが起きないとき *)
+    intros col1 t1' e' t2' Heq [Hcol1 [Ht1' [He' Ht2']]] Ht. inversion Ht. subst.
+    destruct HC as [HC | [[HCa HCb]| [HCa HCb]]].
+    + assumption.
+    + split; [|assumption].
+      destruct HCa as [col_a [a1 [x [a2 [Heq2 [HCa1 [HCa2 [Ba1 Ba2]]]]]]]]. subst.
+      destruct col_a; now constructor.
+    + split; [assumption|].
+      destruct HCb as [col_b [b1 [x [b2 [Heq2 [HCb1 [HCb2 [Bb1 Bb2]]]]]]]]. subst.
+      destruct col_b; now constructor.
+  - reflexivity.
+  - tauto.
+Qed.
+
 Lemma ins_Colored : forall x t,
   WellColored t ->
   exists t1 t2 e col, ins x t = T col t1 e t2 /\ WellColored t1 /\ WellColored t2.
