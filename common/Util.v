@@ -9,6 +9,7 @@ Definition pair_size {A B : Set} size1 size2 (pair: A*B) :=
 
 Definition pipeline {A B: Type} (x: A) (f: A -> B) := f x.
 Infix "|>" := pipeline (at level 100).
+Hint Unfold pipeline.
 
 (* f x y = f y x でかつ f (f x y) z = f x (f y z) であるfに限る *)
 Definition reduce_right {A: Type} (f: A -> A -> A) (xs: list A) : Result A :=
