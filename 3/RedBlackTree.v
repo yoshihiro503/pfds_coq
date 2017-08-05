@@ -56,7 +56,14 @@ Inductive BalancedWithLength : nat -> tree -> Prop :=
 
 (* 赤黒木の条件2: すべての経路に置いて赤が2連続で現れない *)
 (* TODO *)
-Inductive WellColored : tree -> Prop :=.
+Inductive WellColored : tree -> Prop :=
+| CE : WellColored E
+| CRed : forall a x b,
+    WellColored a -> WellColored b -> IsRootBlack a -> IsRootBlack b ->
+    WellColored (T 赤 a x b)
+| CBlack : forall a x b,
+    WellColored a -> WellColored b -> WellColored (T 黒 a x b)
+.
 
 (**
  ** 演習 3.8
@@ -169,4 +176,97 @@ Proof.
       constructor; now auto.
   - (* ~x < y かつ ~y < x のとき (すなわち x = y) *)
     intros s col a y b eq Hnotlt1 _ Hnotlt2 _ n HBt. subst. assumption.
+Qed.
+
+Lemma balance_color_changed : forall a b y e t1 t2,
+  balance 黒 a y b = T 赤 t1 e t2 -> IsRootBlack t1 /\ IsRootBlack t2.
+Proof.
+  intros a b y e t1 t2.
+  apply (balance_aux (fun '(col,t1',e',t2') t => col = 黒 -> balance 黒 a y b = t -> t = T 赤 t1 e t2 -> IsRootBlack t1 /\ IsRootBlack t2)).
+  - intros a' b' c' d' x' y' z' Hcol Heq. simpl.
+    inversion 1. split; now constructor.
+  - intros a' b' c' d' x' y' z' Hcol Heq. simpl.
+    inversion 1. split; now constructor.
+  - intros a' b' c' d' x' y' z' Hcol Heq. simpl.
+    inversion 1. split; now constructor.
+  - intros a' b' c' d' x' y' z' Hcol Heq. simpl.
+    inversion 1. split; now constructor.
+  - intros col t1' e' t2' Hcol Heq. inversion 1. now subst.
+  - reflexivity.
+  - reflexivity.
+Qed.
+
+Lemma ins_color_changed : forall t x e t1 t2,
+  WellColored t -> IsRootBlack t ->
+  ins x t = T 赤 t1 e t2 -> IsRootBlack t1 /\ IsRootBlack t2.
+Proof.
+  intros t x e t1 t2 HC HBt. inversion HBt as [|a b y].
+  - (* t = E *)
+    simpl. inversion 1. split; now constructor.
+  - (* t = T 黒 a y bのとき *)
+    simpl. destruct (x <? y); [|destruct (y <? x)].
+    + (* x < y *)
+      now apply balance_color_changed.
+    + (* y < x *)
+      now apply balance_color_changed.
+    + (* x = y *)
+      now inversion 1.
+Qed.
+
+Lemma ins_Colored : forall x t,
+  WellColored t ->
+  exists t1 t2 e col, ins x t = T col t1 e t2 /\ WellColored t1 /\ WellColored t2.
+Proof.
+  intros x t. apply ins_ind.
+  - (* t = E *)
+    intros _ _ HC. exists E, E, x, 赤. now split; [|split].
+  - (* t = T col a y b で x < y *)
+    intros _ col a y b _ Hlt _ IHa HC.
+    cut (WellColored a); [intros HCa| now inversion HC].
+    cut (WellColored b); [intros HCb| now inversion HC].
+    destruct (IHa HCa) as [t1 [t2 [e [col_a [Heq [HCt1 HCt2]]]]]].
+    apply (balance_aux (fun '(col', a', y', b') t => col'=col /\ a'=(ins x a) /\ y'=y /\ b'=b ->
+      balance col (ins x a) y b = t ->
+      exists t1 t2 e col0, 
+      t = T col0 t1 e t2 /\ WellColored t1 /\ WellColored t2)).
+    + (* もみほぐしがおきるときその1 *)
+      intros a' b' c' d' x' y' z' [Hcol [Hins [Hz Hd]]] Hbalance. subst z' d' col.
+      exists (T 黒 a' x' b'), (T 黒 c' y b), y', 赤.
+      split; [reflexivity|]. rewrite Heq in Hins. inversion Hins. subst.
+      split; [constructor; now inversion HCt1|now constructor].
+    + (* もみほぐしがおきるときその2 *)
+      admit.
+    + (* もみほぐしがおきるときその3 *)
+      admit.
+    + (* もみほぐしがおきるときその4 *)
+      admit.
+    + (* もみほぐさないとき *)
+      intros col' a' y' b' [Hcol [Hins [Hy' Hb']]]. subst.
+      exists (ins x a), b, y, col. split; [reflexivity| ]. split;[ |assumption].
+      rewrite Heq. destruct col_a.
+      (* ins x aの結果が赤のとき *)
+      * { destruct col.
+          - (* 最初の木の一番ルートが赤のとき *)
+            inversion HC. subst.
+            destruct (ins_color_changed _ x e t1 t2 H3 H5 Heq) as [Bt1 Bt2].
+            now constructor.
+          - (* 最初の木の一番ルートが黒のとき *)
+            (* t1 が赤ならばbalanceでrotateしていたはず *)
+            rewrite Heq in H.
+            constructor; [assumption|assumption| |].
+            + destruct t1; [now constructor|].
+              destruct c; [| now constructor].
+              now unfold balance in H.
+            + destruct t2; [now constructor|].
+              destruct c; [| now constructor].
+              unfold balance in H. destruct t1; [discriminate H|]. now destruct c.
+        }
+      (* ins x aの結果が黒のとき *)
+      * now constructor.
+    + tauto.
+    + reflexivity.
+  - (* t = T col a y b で x > y *)
+    admit.
+  - (* t = T col a y b で x = y *)
+    admit.
 Qed.
