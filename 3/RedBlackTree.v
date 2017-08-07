@@ -359,6 +359,7 @@ Qed.
 Inductive TreeForall (P : Elem.T -> Prop) : tree -> Prop :=
 | TreeForallE : TreeForall P E
 | TreeForallT : forall col t1 x t2, P x -> TreeForall P t1 -> TreeForall P t2 -> TreeForall P (T col t1 x t2).
+Hint Constructors TreeForall.
 
 Lemma TreeForall_impl : forall (P Q: Elem.T -> Prop),
     (forall x, P x -> Q x) ->
@@ -370,6 +371,50 @@ Proof.
  - constructor; now auto.
 Qed.
 
+Lemma balance_Forall : forall P col a y b,
+  TreeForall P a -> P y -> TreeForall P b -> TreeForall P (balance col a y b).
+Proof.
+  intros P col a y b Pa Py Pb.
+  apply (balance_aux (fun '(col',t1,e,t2) t => col'=col/\t1=a/\e=y/\t2=b -> TreeForall P (t))).
+  - (* もみほぐしその1 *)
+    intros a' b' c d x y' z [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Pa. inversion H4. subst. constructor; [assumption | |].
+    + now constructor.
+    + now constructor.
+  - (* もみほぐしその2 *)
+    intros a' b' c d x y' z [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Pa. inversion H5. subst. constructor; [assumption | |].
+    + now constructor.
+    + now constructor.
+  - (* もみほぐしその3 *)
+    intros a' b' c d x y' z [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Pb. inversion H4. subst. constructor; [assumption | |].
+    + now constructor.
+    + now constructor.
+  - (* もみほぐしその4 *)
+    intros a' b' c d x y' z [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Pb. inversion H5. subst. constructor; [assumption | |].
+    + now constructor.
+    + now constructor.
+  - (* もみほぐしが起きなかったとき *)
+    intros col' a' y' b' [Hcol [Ha [Hy Hb]]]. subst. now constructor.
+  - tauto.
+Qed.
+
+Lemma ins_Forall : forall P x t,
+  TreeForall P t -> P x -> TreeForall P (ins x t).
+Proof.
+  intros P x t. apply ins_ind.
+  - (* t = Eのとき *)
+    intros _ _ _ Px. now constructor.
+  - (* t = T col a y b で x < yのとき *)
+    intros _ col a y b _ _ _ IHa Pt Px. inversion Pt. apply balance_Forall; now auto.
+  - (* t = T col a y b で x > yのとき *)
+    intros _ col a y b _ _ _ _ _ IHb Pt Px. inversion Pt. apply balance_Forall; now auto.
+  - (* t = T col a y b で x = yのとき *)
+    intros s col a y b Heq _ _ _ _ Pt Px. subst s. assumption.
+Qed.
+
 (**
      二分木の要素が対象順(symmetric order)で格納されているということを示す[Prop]。
      「対象順とは任意の与えられたノードの要素が、その左側の部分木の中のどの要素よりも大きく、
@@ -378,3 +423,90 @@ Qed.
 Inductive Ordered : tree -> Prop :=
 | OrderedE : Ordered E
 | OrderedT : forall col t1 x t2, Ordered t1 -> Ordered t2 -> TreeForall (fun x1 => x1 < x) t1 -> TreeForall(fun x2 => x < x2) t2 -> Ordered (T col t1 x t2).
+
+Lemma balance_Ordered : forall col a y b,
+ Ordered a -> Ordered b ->
+ TreeForall (fun x => x < y) a -> TreeForall (fun x => y < x) b ->
+   Ordered (balance col a y b).
+Proof.
+  intros col a y b Orda Ordb Lt_ay Lt_yb.
+  apply (balance_aux (fun '(col',a',y',b') t => col'=col/\a'=a/\y'=y/\b'=b -> Ordered t)).
+  - (* もみほぐし 1 *)
+    intros a11 a12 a2 b' e2 e1 y' [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Orda as [|col a1 x1' a2' Orda1 Orda2 Lt_a1 Lt_a2]. subst. clear Orda.
+    inversion Orda1 as [|col a'' x' b'' Orda' Ordb' Lt_a' Lt_b']. subst. clear Orda1.
+    inversion Lt_ay as [|col a1 x1' a2' Lt_x1 Lt_a1' Lt_a2']. subst. clear Lt_ay.
+    constructor.
+    + now constructor.
+    + now constructor.
+    + inversion Lt_a1. now constructor.
+    + constructor; [assumption | assumption|].
+      eapply TreeForall_impl; [|exact Lt_yb]. intros x. simpl.
+      now apply Elem.Ord.lt_trans.
+  - (* もみほぐし 2 *)
+    intros a1 a21 a22 b' e1 e2 y' [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Orda as [|col a1' x1' a2 Orda1 Orda2 Lt_a1 Lt_a2]. subst. clear Orda.
+    inversion Orda2 as [|col a'' x' b'' Orda' Ordb' Lt_a' Lt_b']. subst. clear Orda2.
+    inversion Lt_ay as [|col a1' x1' a2' Lt_x1 Lt_a1' Lt_a2']. subst. clear Lt_ay.
+    inversion Lt_a2 as [|col a21' e2' a22' Lt_e12 Lt_a21 Lt_a22]. subst. clear Lt_a2.
+    inversion Lt_a2' as [|col a21' e2' a22' Lt_e1y Lt_a21' Lt_a22']. subst. clear Lt_a2'.
+    constructor.
+    + now constructor.
+    + now constructor.
+    + constructor; [assumption| |assumption].
+      eapply TreeForall_impl; [|exact Lt_a1]. intros a1_x.
+      simpl. intros Hlt. apply (Elem.Ord.lt_trans _ _ _ Hlt Lt_e12).
+    + constructor; [assumption | assumption|].
+      eapply TreeForall_impl; [|exact Lt_yb]. intros b_x. simpl.
+      now apply Elem.Ord.lt_trans.
+  - (* もみほぐし 3 *)
+    intros a' b11 b12 b2 y' e2 e1 [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Ordb as [|col b1 e1' b2' Ordb1 Ordb2 Lt_b1e1 Lt_e1b2]. subst. clear Ordb.
+    inversion Ordb1 as [|col b11' e2' b12' Ordb11 Ordb12 Lt_b11 Lt_b12]. subst. clear Ordb1.
+    inversion Lt_yb as [|col b11' e1' b2' Lt_xe1 Lt_yb1 Lt_yb2]. subst. clear Lt_yb.
+    inversion Lt_b1e1 as [|col b11' e2' b12' Lt_e2e1 Lt_b11e1 Lt_b12e1]. subst. clear Lt_b1e1.
+    inversion Lt_yb1 as [|col b11' e2' b12' Lt_ye2 Lt_yb11 Lt_yb12]. subst. clear Lt_yb1.
+    constructor.
+    + now constructor.
+    + now constructor.
+    + constructor; [assumption| |assumption].
+      eapply TreeForall_impl; [|exact Lt_ay]. intros a_x. simpl.
+      intros Hlt. now apply (Elem.Ord.lt_trans _ y _).
+    + constructor; [assumption | assumption|].
+      eapply TreeForall_impl; [|exact Lt_e1b2]. intros x. simpl.
+      now apply Elem.Ord.lt_trans.
+  - (* もみほぐし 4 *)
+    intros a' b1 b21 b22 y' e1 e2 [Hcol [Ha [Hy Hb]]]. subst.
+    inversion Ordb as [|col b1' e1' b2' Ordb1 Ordb2 Lt_b1e1 Lt_e1b2]. subst. clear Ordb.
+    inversion Ordb2 as [|col b21' e2' b22' Ordb21 Ordb22 Lt_b21 Lt_b22]. subst. clear Ordb2.
+    inversion Lt_yb as [|col b11' e1' b2' Lt_ye1 Lt_yb1 Lt_yb2]. subst. clear Lt_yb.
+    inversion Lt_e1b2 as [|col b21' e2' b22' Lt_e2e1 Lt_e1b21 Lt_e1b22]. subst. clear Lt_e1b2.
+    inversion Lt_yb2 as [|col b21' e2' b22' Lt_ye2 Lt_yb21 Lt_yb22]. subst. clear Lt_yb2.
+    constructor.
+    + now constructor.
+    + now constructor.
+    + constructor; [assumption| |assumption].
+      eapply TreeForall_impl; [|exact Lt_ay]. intros a_x. simpl.
+      intros Hlt. now apply (Elem.Ord.lt_trans _ y _).
+    + now constructor.
+  - (* もみほぐし がおきない *)
+    intros col' a' y' b' [Hcol [Ha [Hy Hb]]]. subst. now constructor.
+  - tauto.
+Qed.    
+
+Lemma ins_Ordered : forall x t,
+    Ordered t -> Ordered (ins x t).
+Proof.
+  intros x t. apply ins_ind.
+  - (* t = E のとき *)
+    intros _ _ Ordt. constructor; now constructor.
+  - (* t = T col a y bで x < y のとき *)
+    intros _ col a y b _ Hlt _ IHa Ordt.
+    inversion Ordt.
+    apply balance_Ordered; [now apply IHa| assumption| |assumption].
+    now apply ins_Forall.
+  - (* t = T col a y bで x > y のとき *)
+    admit.
+  - (* t = T col a y bで x = y のとき *)
+    intros s col a y b Heq Hgt _ Hlt _ Ordt. subst s. assumption.
+Admitted.

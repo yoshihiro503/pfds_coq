@@ -39,6 +39,10 @@ Module Make(S : Seed).
    intros n m. now unfold lt.
   Qed.
 
+  Lemma lt_trans : forall n m p, lt n m -> lt m p -> lt n p.
+    (*TODO*)
+  Admitted.
+
   Module Op.
     Infix "<=" := leq.
     Infix "<" := lt.
