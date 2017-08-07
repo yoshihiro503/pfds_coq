@@ -153,7 +153,7 @@ Qed.
  *)
 
 (**
- *** insertが不変条件2の「すべての経路で黒の数が同一」を保つことを証明
+ **** insertが不変条件2の「すべての経路で黒の数が同一」を保つことを証明
  *)
 
 Lemma balance_Balanced : forall n color elem t1 t2,
@@ -196,7 +196,7 @@ Proof.
 Qed.
 
 (**
- *** insertが不変条件1の「赤が2連続で現れない」を保つことを証明
+ **** insertが不変条件1の「赤が2連続で現れない」を保つことを証明
  *)
 
 Lemma balance_color_changed : forall a b y e t1 t2,
