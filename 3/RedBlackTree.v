@@ -351,3 +351,30 @@ Proof.
     cut (WellColored b); [intros HCb| now inversion HC].
     tauto.
 Qed.
+
+(**
+ **** [insert]で木の順序が崩れていないことを証明
+ *)
+
+Inductive TreeForall (P : Elem.T -> Prop) : tree -> Prop :=
+| TreeForallE : TreeForall P E
+| TreeForallT : forall col t1 x t2, P x -> TreeForall P t1 -> TreeForall P t2 -> TreeForall P (T col t1 x t2).
+
+Lemma TreeForall_impl : forall (P Q: Elem.T -> Prop),
+    (forall x, P x -> Q x) ->
+    forall t, TreeForall P t -> TreeForall Q t.
+Proof.
+ intros P Q Impl t Pt.
+ induction Pt.
+ - now constructor.
+ - constructor; now auto.
+Qed.
+
+(**
+     二分木の要素が対象順(symmetric order)で格納されているということを示す[Prop]。
+     「対象順とは任意の与えられたノードの要素が、その左側の部分木の中のどの要素よりも大きく、
+     右側の部分木のどの要素よりも小さい、という意味である」
+ *)
+Inductive Ordered : tree -> Prop :=
+| OrderedE : Ordered E
+| OrderedT : forall col t1 x t2, Ordered t1 -> Ordered t2 -> TreeForall (fun x1 => x1 < x) t1 -> TreeForall(fun x2 => x < x2) t2 -> Ordered (T col t1 x t2).
