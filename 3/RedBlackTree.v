@@ -57,7 +57,6 @@ Inductive BalancedWithLength : nat -> tree -> Prop :=
 Hint Constructors BalancedWithLength.
 
 (* 赤黒木の条件2: すべての経路に置いて赤が2連続で現れない *)
-(* TODO *)
 Inductive WellColored : tree -> Prop :=
 | CE : WellColored E
 | CRed : forall a x b,
@@ -87,7 +86,11 @@ Hint Constructors WellColored.
  *)
 
 (**
- ** insertの定義
+ ** insert
+ *)
+
+(**
+ *** [insert]関数の定義
  *)
 
 Definition balance color t1 e t2 :=
@@ -117,6 +120,9 @@ Definition insert (x: Elem.T) (s: tree) : tree :=
 
 Functional Scheme ins_ind := Induction for ins Sort Prop.
 
+(**
+    [balance]関数で場合分けを簡単にするための補題。
+ *)
 Lemma balance_aux : forall (P : (color*tree*Elem.T*tree) -> tree -> Prop),
   (forall a b c d x y z,
       P (黒, T 赤 (T 赤 a x b) y c, z, d) (T 赤 (T 黒 a x b) y (T 黒 c z d))) ->
@@ -141,6 +147,14 @@ Proof.
                                        (destruct t22 as [|c22 t22_1 x22 t22_2]; [|destruct c22])
   ]); unfold balance; try (now auto).
 Qed.
+
+(**
+ *** insertに関する証明
+ *)
+
+(**
+ *** insertが不変条件2の「すべての経路で黒の数が同一」を保つことを証明
+ *)
 
 Lemma balance_Balanced : forall n color elem t1 t2,
   BalancedWithLength n (T color t1 elem t2) -> BalancedWithLength n (balance color t1 elem t2)
@@ -180,6 +194,10 @@ Proof.
   - (* ~x < y かつ ~y < x のとき (すなわち x = y) *)
     intros s col a y b eq Hnotlt1 _ Hnotlt2 _ n HBt. subst. assumption.
 Qed.
+
+(**
+ *** insertが不変条件1の「赤が2連続で現れない」を保つことを証明
+ *)
 
 Lemma balance_color_changed : forall a b y e t1 t2,
   balance 黒 a y b = T 赤 t1 e t2 -> IsRootBlack t1 /\ IsRootBlack t2.
@@ -245,116 +263,6 @@ Proof.
   - (* b 黒の時 *)
     now constructor.
 Qed.
-
-Lemma balance_Colored : forall col a y b col0 t1 e t2,
-  (WellColored a /\ WellColored b) \/
-    ((exists col_a a1 x a2, a = T col_a a1 x a2 /\ WellColored a1 /\ WellColored a2 /\
-                            IsRootBlack a1 /\ IsRootBlack a2) /\ WellColored b) \/
-    (WellColored a /\ (exists col_b b1 x b2, b = T col_b b1 x b2 /\ WellColored b1 /\
-                                             WellColored b2 /\ IsRootBlack b1 /\ IsRootBlack b2)) ->
-  balance col a y b = T col0 t1 e t2 ->
-  WellColored t1 /\ WellColored t2.
-Proof.
-(*  
-  intros col a y b col0 t1 e t2 HC Hbal.
-  assert (WellColored a /\ WellColored b).
-  - destruct HC as [HC|[HC|HC]].
-    + assumption.
-    + destruct HC as [HC Cb]. split; [|assumption].
-      destruct HC as [col_a [a1 [x [a2 [Ha [Ca1 [Ca2 [Ba1 Ba2]]]]]]]].
-      subst a. destruct col_a; now constructor.
-    + destruct HC as [Ca HC]. split; [assumption|].
-      destruct HC as [col_b [b1 [x [b2 [Hb [Cb1 [Cb2 [Bb1 Bb2]]]]]]]].
-      subst b. destruct col_b; now constructor.
-  - 
-*)
-
-  intros col a y b col0 t1 e t2 HC.
-  apply (balance_aux (fun '(col', a', y', b') t => balance col' a' y' b' = t ->
-                                                   col'=col/\a'=a/\y'=y/\b'=b ->
-    t = T col0 t1 e t2 -> WellColored t1 /\ WellColored t2)).
-  - (* もみほぐしが起きるとき その1 *)
-    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
-    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
-    + inversion HCa. split; [|now constructor]. inversion H2. now constructor.
-    + destruct HCa as [col_a [a1 [x [a2 [Heq2 [HCa1 [HCa2 [_ _]]]]]]]]. inversion Heq2. subst.
-      split; [|now constructor]. inversion HCa1. now constructor.
-    + now inversion HCa.
-  - (* もみほぐしが起きるとき その2 *)
-    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
-    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
-    + inversion HCa. inversion H3. split; now constructor.
-    + destruct HCa as [col_a [a1 [x [a2 [Heq2 [HCa1 [HCa2 [_ _]]]]]]]]. inversion Heq2. subst.
-      inversion HCa2. split; now constructor.
-    + now inversion HCa.
-  - (* もみほぐしが起きるとき その3 *)
-    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
-    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
-    + inversion HCb. inversion H2. split; now constructor.
-    + now inversion HCb.
-    + destruct HCb as [col_b [b1 [x [b2 [Heq2 [HCb1 [HCb2 [_ _]]]]]]]]. inversion Heq2. subst.
-      inversion HCb1. split; now constructor.
-  - (* もみほぐしが起きるとき その4 *)
-    intros a' b' c' d' x' y' z' _ [Hcol [Ha [ Hz Hd]]] Heq. inversion Heq. subst.
-    destruct HC as [[HCa HCb] |[[HCa HCb]| [HCa HCb]]].
-    + inversion HCb. inversion H3. split; now constructor.
-    + now inversion HCb.
-    + destruct HCb as [col_b [b1 [x [b2 [Heq2 [HCb1 [HCb2 [_ _]]]]]]]]. inversion Heq2. subst.
-      inversion HCb2. split; now constructor.
-  - (* もみほぐしが起きないとき *)
-    intros col1 t1' e' t2' Heq [Hcol1 [Ht1' [He' Ht2']]] Ht. inversion Ht. subst.
-    destruct HC as [HC | [[HCa HCb]| [HCa HCb]]].
-    + assumption.
-    + split; [|assumption].
-      destruct HCa as [col_a [a1 [x [a2 [Heq2 [HCa1 [HCa2 [Ba1 Ba2]]]]]]]]. subst.
-      destruct col_a; now constructor.
-    + split; [assumption|].
-      destruct HCb as [col_b [b1 [x [b2 [Heq2 [HCb1 [HCb2 [Bb1 Bb2]]]]]]]]. subst.
-      destruct col_b; now constructor.
-  - reflexivity.
-  - tauto.
-Qed.
-
-(*Lemma ins_Colored : forall x t col t1 e t2,
-  WellColored t ->
-  ins x t = T col t1 e t2 -> WellColored t1 /\ WellColored t2.
-Proof.
-  intros x t. apply ins_ind.
-  - (* t = E *)
-    intros _ _ col t1 e t2 HC Heq. inversion Heq. now split.
-  - (* t = T col a y b で x < y *)
-    intros _ col a y b _ _ _ IHa col0 t1 e t2 HC Heq.
-    cut (WellColored a); [intros HCa| now inversion HC].
-    cut (WellColored b); [intros HCb| now inversion HC].
-    eapply balance_Colored; [| exact Heq].
-    case_eq (ins x a); [left; now split|].
-    intros c t1' e' t2' Hins_a.
-    destruct (IHa _ _ _ _ HCa Hins_a) as [IHa1 IHa2].
-    destruct c.
-    + (* ins x a の結果が赤のとき *)
-      destruct col.
-        (* 元の木の根が赤のとき *)
-      * inversion HC as [| a' y' b' _ _ Ba Bb |].
-        right; left. split; [|assumption]. exists 赤, t1', e', t2'.
-        edestruct (ins_color_changed a x e' t1' t2' HCa Ba Hins_a) as [Bt1' Bt2'].
-        tauto.
-        (* 元の木の根が黒のとき *)
-      * rewrite Hins_a in Heq.
-        { destruct t1' as [|col1 t11 e1 t12].
-          - destruct t2' as [|col2 t21 e2 t22]; [left; now split; [constructor|]|].
-            destruct col2; [right; left|right; left].
-            + split; [| assumption]. exists 赤, E, e', (T 赤 t21 e t22).
-              unfold balance in Heq.
-        split; [|split; [|split]]; try now auto.
-        { split.
-          - destruct t1'; [now constructor|].
-            destruct c; [|now constructor].
-            
-
-        
-    + (* ins x a の結果が黒のとき *)
-Qed.
-*)
 
 Lemma ins_Colored : forall x t,
   WellColored t ->
