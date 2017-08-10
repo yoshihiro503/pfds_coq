@@ -506,7 +506,10 @@ Proof.
     apply balance_Ordered; [now apply IHa| assumption| |assumption].
     now apply ins_Forall.
   - (* t = T col a y bで x > y のとき *)
-    admit.
+    intros _ col a y b _ _ _ Hgt _ IHa Ordt.
+    inversion Ordt.
+    apply balance_Ordered; [assumption | now apply IHa | assumption | ].
+    now apply ins_Forall.
   - (* t = T col a y bで x = y のとき *)
     intros s col a y b Heq Hgt _ Hlt _ Ordt. subst s. assumption.
-Admitted.
+Qed.
