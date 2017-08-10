@@ -195,6 +195,16 @@ Proof.
     intros s col a y b eq Hnotlt1 _ Hnotlt2 _ n HBt. subst. assumption.
 Qed.
 
+Lemma insert_Balanced : forall n x t,
+    BalancedWithLength n t -> exists m, BalancedWithLength m (insert x t).
+Proof.
+  intros n x t HBal. unfold insert.
+  destruct (ins_Balanced n x _ HBal) as [|n e t1 t2|n e t1 t2].
+  - now exists 0.
+  - exists (1 + n). now constructor.
+  - exists (1 + n). now constructor.
+Qed.
+
 (**
  **** insertが不変条件1の「赤が2連続で現れない」を保つことを証明
  *)
