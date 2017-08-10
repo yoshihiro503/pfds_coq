@@ -352,6 +352,15 @@ Proof.
     tauto.
 Qed.
 
+Lemma insert_Colored : forall x t,
+  WellColored t ->
+  WellColored (insert x t).
+Proof.
+  intros x t HCt. unfold insert.
+  destruct (ins_Colored x _ HCt) as [t1 [t2 [e [col [Heq [HCt1 HCt2]]]]]].
+  rewrite Heq. now constructor.
+Qed.
+
 (**
  **** [insert]で木の順序が崩れていないことを証明
  *)
