@@ -547,13 +547,81 @@ Qed.
  その関数は O(n) 時間で実行できるはずだ。
  *)
 
+Require Import Omega.
+Require Import PFDS.common.Modulo.
+Variable dummyE : Elem.T.
+
 (**
  *** 補助関数を定義
 
  [fromOrdListAux k xs depth] はリスト[xs]の先頭[k]個分を赤黒木に変換した木と残りのリストの組みを返す。
  このとき[depth]は作るべき木の黒長さとする。また、[k]は[xs]の長さ以下でなければならない。
+ [dummyE]は使用されないはず
  *)
-Variable fromOrdListAux : nat -> list Elem.T -> nat -> (tree * list Elem.T).
+
+(*
+Function fromOrdListAux k xs d {measure id k} : (tree * list Elem.T) :=
+  match k with
+  | O => (E, xs)
+  | 1 =>
+    let x := List.hd dummyE xs in
+    let xs' := List.tl xs in
+    if (d =? O)%nat then (T 赤 E x E, xs')
+    else                 (T 黒 E x E, xs')
+  | S (S _) =>
+    let '(q, r) := Modulo.quot_mod k 2 in
+    let k1 := q in
+    let k2 := if (r =? 0)%nat then q - 1 else q in
+    let '(a, ys) := fromOrdListAux k1 xs (d-1) in
+    let x := List.hd dummyE ys in
+    let ys' := List.tl ys in
+    let '(b, zs) := fromOrdListAux k2 ys' (d-1) in
+    (T 黒 a x b, zs)
+  end.
+ - intros. unfold id.
+   destruct (Modulo.quot_mod_sound (S (S n0)) 2 q r); [auto with arith| assumption|].
+   destruct (r =? 0)%nat; omega.
+ - intros. unfold id.
+   destruct (Modulo.quot_mod_sound (S (S n0)) 2 q r); [auto with arith| assumption|].
+   destruct (r =? 0)%nat; omega.
+   (* 証明は全て終わるがここで「Cannot create equation lemma. This may be because the function is nested-recursive.」 と言われてエラーになってしまう. *)
+Defined.
+*)
+
+(* しょーがないから Fix_F を使って定義する *)
+Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list Elem.T).
+  refine (Fix_F (fun _:nat => (list Elem.T -> nat -> tree * list Elem.T)%type) (fun k F xs d => _) (lt_wf k) xs d).
+  refine (match k as n return k = n -> tree * list Elem.T with
+          | O => _
+          | 1 => _
+          | _ => _
+          end (eq_refl _)).
+  - intros _. exact (E, xs).
+  - intros _.
+    refine (
+        let x := List.hd dummyE xs in
+        let xs' := List.tl xs in
+        if (d =? O)%nat then (T 赤 E x E, xs')
+        else                 (T 黒 E x E, xs')
+      ).
+  - intros k_eq.
+    edestruct (Modulo.quotient_modulo 2) as [[q r] [Hqr Hr]]; [auto with arith| ].
+    replace k with (q * 2 + r) in k_eq; [|now rewrite <- Hqr].
+    refine (
+        let k1 := q in
+        let k2 := if (r =? 0)%nat then q - 1 else q in
+        let '(a, ys) := F k1 _ xs (d-1) in
+        let x := List.hd dummyE ys in
+        let ys' := List.tl ys in
+        let '(b, zs) := F k2 _ ys' (d-1) in
+        (T 黒 a x b, zs)
+      ).
+    + unfold k1. omega.
+    + unfold k2.
+      destruct (r =? 0)%nat; omega.
+Defined.
+
+
 
 (**
    赤黒木となる条件その2: 赤-赤違反がないこと
