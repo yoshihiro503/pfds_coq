@@ -539,3 +539,20 @@ Proof.
   intros x t Ordt. unfold insert.
   destruct (ins_Ordered x _ Ordt); now constructor.
 Qed.
+
+(**
+ ** 演習 3.9
+
+ 重複のないソート済みリストから赤黒木へ変換する、型 [list Elem.T -> tree] の関数 [fromOrdList] を書いて見よう。
+ その関数は O(n) 時間で実行できるはずだ。
+ *)
+
+Variable fromOrdListAux : nat -> list Elem.T -> nat -> (tree * list Elem.T).
+Variable R : Set. (* 0以上の実数 *)
+Variable floor : R -> nat.
+Variable log2 : nat -> R.
+
+Definition fromOrdList xs :=
+  let n := List.length xs in
+  let maxDepth := floor (log2 n) in
+  fromOrdListAux n xs maxDepth.
