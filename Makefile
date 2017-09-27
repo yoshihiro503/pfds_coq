@@ -108,6 +108,7 @@ VFILES:=common/Util.v\
   common/TotalOrder.v\
   common/DecidableOrder.v\
   common/Power.v\
+  common/Modulo.v\
   2/BinaryTree.v\
   3/LeftistHeap.v\
   3/BinomialHeap.v\
