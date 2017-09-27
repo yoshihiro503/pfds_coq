@@ -562,6 +562,19 @@ Variable fromOrdListAux : nat -> list Elem.T -> nat -> (tree * list Elem.T).
 Lemma fromOrdListAux_WellColored : forall k xs d t xs', fromOrdListAux k xs d = (t, xs') -> WellColored t.
 Admitted.
 
+(**
+   赤黒木となる条件その1: 全てのパスに関して黒ノードの数が等しくなること
+ *)
+
+(**
+   [fromOrdListAux]の再帰呼び出しに関して次の普遍条件が成り立つことを示す補題
+ *)
+
+(*Lemma l : . *)
+
+Lemma fromOrdListAux_BalancedWithLength : forall k xs d t xs',
+    fromOrdListAux k xs d = (t, xs') -> BalancedWithLength d t.
+Admitted.
 
 (**
  *** 補助関数[fromOrdListAux]を使って、求める関数を定義
@@ -575,4 +588,3 @@ Definition fromOrdList xs :=
   let n := List.length xs in
   let maxDepth := floor (log2 n) in
   fromOrdListAux n xs maxDepth.
-
