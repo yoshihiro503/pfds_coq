@@ -532,3 +532,10 @@ Proof.
   - (* t = T col a y bで x = y のとき *)
     intros s col a y b Heq Hgt _ Hlt _ Ordt. subst s. assumption.
 Qed.
+
+Theorem insert_Ordered : forall x t,
+    Ordered t -> Ordered (insert x t).
+Proof.
+  intros x t Ordt. unfold insert.
+  destruct (ins_Ordered x _ Ordt); now constructor.
+Qed.
