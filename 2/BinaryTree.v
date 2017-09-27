@@ -198,6 +198,10 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
   (**
    ** 演習問題 2.5
    *)
+
+  (**
+   *** 演習問題 2.5 (a)
+   *)
   Fixpoint complete x d :=
     match d with
     | O => E
@@ -219,13 +223,23 @@ Module UnbalancedSet (ElementSeed : DecidableOrder.Seed).
     - simpl. now constructor.
   Qed.
 
-(*
-  (* 演習問題 2.5(b) *)
-  Fixpoint create2 (x : Elem) (size : nat) :=
-    match size with
-    | O => (E, T E x E)
-    | S p =>
-      l
-*)
+  (**
+   *** 演習問題 2.5 (b)
+
+Scalaでかくと
+<<
+def create2(m: Int): (Tree,Tree) =
+  if (m == 0) (E, T(E, x, E)) else {
+    val (t1, t2) = create2((m-1) / 2)
+    if ((m-1) % 2 == 0) {
+      (T (t1, x, t1), T(t1, x, t2))
+    } else {
+      (T (t1, x, t2), T(t2, x, t2))
+    }
+  }
+
+def create(n: Int) = create2(n)._1
+>>
+   *)
 
 End UnbalancedSet.
