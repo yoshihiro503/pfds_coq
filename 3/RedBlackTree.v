@@ -547,7 +547,26 @@ Qed.
  その関数は O(n) 時間で実行できるはずだ。
  *)
 
+(**
+ *** 補助関数を定義
+
+ [fromOrdListAux k xs depth] はリスト[xs]の先頭[k]個分を赤黒木に変換した木と残りのリストの組みを返す。
+ このとき[depth]は作るべき木の黒長さとする。また、[k]は[xs]の長さ以下でなければならない。
+ *)
 Variable fromOrdListAux : nat -> list Elem.T -> nat -> (tree * list Elem.T).
+
+(**
+   赤黒木となる条件その2: 赤-赤違反がないこと
+   こちらの方が証明が楽なため先に証明する。
+ *)
+Lemma fromOrdListAux_WellColored : forall k xs d t xs', fromOrdListAux k xs d = (t, xs') -> WellColored t.
+Admitted.
+
+
+(**
+ *** 補助関数[fromOrdListAux]を使って、求める関数を定義
+ *)
+
 Variable R : Set. (* 0以上の実数 *)
 Variable floor : R -> nat.
 Variable log2 : nat -> R.
@@ -556,3 +575,4 @@ Definition fromOrdList xs :=
   let n := List.length xs in
   let maxDepth := floor (log2 n) in
   fromOrdListAux n xs maxDepth.
+
