@@ -34,3 +34,11 @@ Proof.
   intros Heq_qr. injection Heq_qr. intros Heq_r Heq_q. subst.
   assumption.
 Qed.
+
+Theorem quot_mod_complete : forall x y q r,
+    y > 0 ->
+    x = q * y + r ->
+    y > r ->
+    quot_mod x y = (q, r).
+Proof.
+Admitted.
