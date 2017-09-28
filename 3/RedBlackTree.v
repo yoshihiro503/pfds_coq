@@ -589,6 +589,7 @@ Defined.
 *)
 
 (* しょーがないから Fix を使って定義する *)
+Require Import Init.Wf.
 Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list Elem.T).
   refine (Fix lt_wf (fun _:nat => (list Elem.T -> nat -> tree * list Elem.T)%type) (fun k F xs d => _) k xs d).
   refine (match k as n return k = n -> tree * list Elem.T with
@@ -605,6 +606,10 @@ Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list 
         else                 (T 黒 E x E, xs')
       ).
   - intros k_eq.
+(*
+    case_eq (Modulo.quot_mod k 2). intros q r Heq.
+    destruct (Modulo.quot_mod_sound k 2 q r) as [Hqr Hr]; [now auto with arith| assumption|].
+ *)
     edestruct (Modulo.quotient_modulo 2) as [[q r] [Hqr Hr]]; [auto with arith| ].
     replace k with (q * 2 + r) in k_eq; [|now rewrite <- Hqr].
     refine (
@@ -621,6 +626,45 @@ Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list 
       destruct (r =? 0)%nat; omega.
 Defined.
 
+Require Import FunctionalExtensionality.
+
+Lemma fromOrdListAux_equation : forall  (k : nat) (xs : list Elem.T) (d : nat),
+    fromOrdListAux k xs d =
+      match k with
+      | O => (E, xs)
+      | 1 =>
+        let x := List.hd dummyE xs in
+        let xs' := List.tl xs in
+        if (d =? O)%nat then (T 赤 E x E, xs')
+        else                 (T 黒 E x E, xs')
+      | S (S k') =>
+        let '(q, r) := Modulo.quot_mod k 2 in
+        let k1 := q in
+        let k2 := if (r =? 0)%nat then q - 1 else q in
+        let '(a, ys) := fromOrdListAux k1 xs (d-1) in
+        let x := List.hd dummyE ys in
+        let ys' := List.tl ys in
+        let '(b, zs) := fromOrdListAux k2 ys' (d-1) in
+        (T 黒 a x b, zs)
+      end.
+Proof.
+  intros k xs d. unfold fromOrdListAux at 1. rewrite Fix_eq.
+  - destruct k; [reflexivity|].
+    destruct k; [reflexivity|].
+    destruct (quotient_modulo) as [[q r] [Hqr Hr]].
+    rewrite (Modulo.quot_mod_complete (S (S k)) 2 q r); [|now auto with arith|assumption|assumption].
+    unfold fromOrdListAux.
+    reflexivity.
+  - intros x f g Hfg.
+    apply functional_extensionality. intro xs0.
+    apply functional_extensionality. intros d0.
+    destruct x; [reflexivity|].
+    destruct x; [reflexivity|].
+    destruct (quotient_modulo) as [[q r] [Hqr Hr]].
+    rewrite Hfg.
+    destruct g. rewrite Hfg.
+    reflexivity.
+Qed.
 
 
 (**
