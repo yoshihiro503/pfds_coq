@@ -588,9 +588,9 @@ Function fromOrdListAux k xs d {measure id k} : (tree * list Elem.T) :=
 Defined.
 *)
 
-(* しょーがないから Fix_F を使って定義する *)
+(* しょーがないから Fix を使って定義する *)
 Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list Elem.T).
-  refine (Fix_F (fun _:nat => (list Elem.T -> nat -> tree * list Elem.T)%type) (fun k F xs d => _) (lt_wf k) xs d).
+  refine (Fix lt_wf (fun _:nat => (list Elem.T -> nat -> tree * list Elem.T)%type) (fun k F xs d => _) k xs d).
   refine (match k as n return k = n -> tree * list Elem.T with
           | O => _
           | 1 => _
