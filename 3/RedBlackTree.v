@@ -664,6 +664,50 @@ Proof.
     reflexivity.
 Qed.
 
+Definition wf_ind := well_founded_ind wf.
+Lemma fromOrdListAux_ind:
+  forall P : A -> tree * list Elem.T -> Prop,
+    (forall xs d, P (0,xs,d) (E, xs)) ->
+    (forall xs x xs' d,
+        x = List.hd dummyE xs ->
+        xs' = List.tl xs ->
+        P (1, xs, d) (if (d =? O)%nat then (T 赤 E x E, xs')
+                      else                 (T 黒 E x E, xs'))) ->
+    (forall k' xs d q r k1 k2 ys ys' zs x a b,
+        (q, r) = Modulo.quot_mod (S (S k')) 2 ->
+        k1 = q ->
+        k2 = (if (r =? 0)%nat then q - 1 else q) ->
+        x = List.hd dummyE ys ->
+        ys' = List.tl ys ->
+        P (k1, xs, d-1) (a, ys) ->
+        P (k2, ys', d-1) (b, zs) ->
+          P (S (S k'), xs, d) (T 黒 a x b, zs)) ->
+    forall k xs d, P (k, xs, d) (fromOrdListAux k xs d).
+Proof.
+  intros P IH0 IH1 IHS.
+  Check (wf_ind (fun '(k,xs,d) => P (k,xs,d) (fromOrdListAux k xs d)) ).
+  cut (forall '(k,xs,d), P (k,xs,d) (fromOrdListAux k xs d)).
+  - intros H k xs d. apply (H (k,xs,d)).
+  - apply (wf_ind (fun '(k,xs,d) => P (k,xs,d) (fromOrdListAux k xs d)) ).
+    intros [[k xs] d] IH. unfold ltof in IH.
+    destruct k; [now apply IH0|].
+    destruct k; [now apply IH1|].
+    rewrite fromOrdListAux_equation.
+    case_eq (quot_mod (S (S k)) 2). intros q r Hqr. simpl.
+    case_eq (fromOrdListAux q xs (d-1)). intros a ys Hfola1.
+    case_eq (fromOrdListAux (if (r =? 0)%nat then q - 1 else q) (tl ys) (d - 1)).
+    intros b zs Hfola2.
+    destruct (Modulo.quot_mod_sound (S (S k)) 2 q r); [now auto with arith| assumption| ].
+    eapply IHS.
+    + now rewrite Hqr.
+    + reflexivity.
+    + reflexivity.
+    + reflexivity.
+    + reflexivity.
+    + rewrite <- Hfola1. apply (IH (q, xs, d-1)). omega.
+    + rewrite <- Hfola2. apply (IH (_, _, _)).
+      destruct (r =? 0)%nat; omega.
+Qed.        
 
 (**
    赤黒木となる条件その2: 赤-赤違反がないこと
