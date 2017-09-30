@@ -628,8 +628,6 @@ Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list 
       destruct (r =? 0)%nat; omega.
 Defined.
 
-Require Import FunctionalExtensionality.
-
 Lemma fromOrdListAux_equation : forall  (k : nat) (xs : list Elem.T) (d : nat),
     fromOrdListAux k xs d =
       match k with
@@ -657,9 +655,7 @@ Proof.
     rewrite (Modulo.quot_mod_complete (S (S k)) 2 q r); [|now auto with arith|assumption|assumption].
     unfold fromOrdListAux.
     reflexivity.
-  - intros x f g Hfg.
-    apply functional_extensionality. intro xs0.
-    apply functional_extensionality. intros d0.
+  - intros [[x xs0] d0] f g Hfg.
     destruct x; [reflexivity|].
     destruct x; [reflexivity|].
     destruct (quotient_modulo) as [[q r] [Hqr Hr]].
