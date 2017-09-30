@@ -590,8 +590,10 @@ Defined.
 
 (* しょーがないから Fix を使って定義する *)
 Require Import Init.Wf.
+Definition A : Set := nat * list Elem.T * nat.
+Definition wf := well_founded_ltof A (fun '(k,_,_) => k).
 Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list Elem.T).
-  refine (Fix lt_wf (fun _:nat => (list Elem.T -> nat -> tree * list Elem.T)%type) (fun k F xs d => _) k xs d).
+  refine (Fix wf (fun _:A => (tree * list Elem.T)%type) (fun '(k, xs, d) F => _) (k, xs, d)).
   refine (match k as n return k = n -> tree * list Elem.T with
           | O => _
           | 1 => _
@@ -615,14 +617,14 @@ Definition fromOrdListAux (k : nat) (xs : list Elem.T) (d : nat) : (tree * list 
     refine (
         let k1 := q in
         let k2 := if (r =? 0)%nat then q - 1 else q in
-        let '(a, ys) := F k1 _ xs (d-1) in
+        let '(a, ys) := F (k1, xs, d-1) _ in
         let x := List.hd dummyE ys in
         let ys' := List.tl ys in
-        let '(b, zs) := F k2 _ ys' (d-1) in
+        let '(b, zs) := F (k2, ys', d-1) _ in
         (T 黒 a x b, zs)
       ).
-    + unfold k1. omega.
-    + unfold k2.
+    + unfold k1, ltof. omega.
+    + unfold k2, ltof.
       destruct (r =? 0)%nat; omega.
 Defined.
 
