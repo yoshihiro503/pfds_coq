@@ -714,7 +714,17 @@ Qed.
    こちらの方が証明が楽なため先に証明する。
  *)
 Lemma fromOrdListAux_WellColored : forall k xs d t xs', fromOrdListAux k xs d = (t, xs') -> WellColored t.
-Admitted.
+Proof.
+  intros k xs d t xs' Heq.
+  cut (let '(t, _) := fromOrdListAux k xs d in WellColored t); [now rewrite  Heq|].
+  apply (fromOrdListAux_ind (fun '(k, xs, d) '(t, ys) => WellColored t)).
+  - now auto.
+  - clear k xs d t xs' Heq. intros xs x xs' d Hx Hxs'.
+    destruct (d =? 0)%nat; now constructor.
+  - clear k xs d t xs' Heq.
+    intros k' xs d q r k1 k2 ys ys' zs x a b Hqr Hk1 Hk2 Hx Hys' Ha Hb.
+    now constructor.
+Qed.
 
 (**
    赤黒木となる条件その1: 全てのパスに関して黒ノードの数が等しくなること
