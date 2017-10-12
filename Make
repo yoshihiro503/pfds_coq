@@ -11,3 +11,4 @@ common/Modulo.v
 3/LeftistHeap.v
 3/BinomialHeap.v
 3/RedBlackTree.v
+5/BatchedQueue.v
