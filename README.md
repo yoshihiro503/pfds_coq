@@ -22,6 +22,7 @@ PFDSのアルゴリズムをCoqで書きたい
 ## ビルド方法
 
 ```console
+./configure.sh
 make
 ```
 
