@@ -42,3 +42,27 @@ Definition tail {alpha: Set} (q: queue alpha) :=
   | (x :: f, r) => Some(checkf (f, r))
   end.
 
+Definition Invaliant {A: Set} (q: queue A) :=
+  let '(f, r) := q in
+  f = nil -> r = nil.
+
+Lemma snoc_invaliant : forall (A:Set) (q: queue A) (x : A),
+    Invaliant q -> Invaliant (snoc q x).
+Proof.
+  intros A q x H. destruct q as [f r]. unfold snoc, checkf. simpl.
+  destruct f.
+  - now unfold Invaliant.
+  - now unfold Invaliant.
+Qed.
+
+Lemma tail_invaliant : forall (A:Set) (q q': queue A),
+    Invaliant q -> Some q' = tail q -> Invaliant q'.
+Proof.
+  intros A q q' H. destruct q as [f r].
+  destruct f.
+  - now unfold tail.
+  - unfold tail, checkf. intros Heq. injection Heq. intros Heq'. clear Heq. subst q'.
+    destruct f.
+    + now unfold Invaliant.
+    + now unfold Invaliant.
+Qed.
