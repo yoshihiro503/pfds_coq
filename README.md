@@ -1,7 +1,14 @@
-PFDSのアルゴリズムをCoqで書きたい
+[![CircleCI](https://circleci.com/gh/yoshihiro503/pfds_coq.svg?style=svg)](https://circleci.com/gh/yoshihiro503/pfds_coq)
+
+# Coq proofs of PFDS
 
 > 「イミュータブルデータ構造は遅いような気がしていたがそんなことはなかったぜ！」
+
 [20分でわかるPurely FunctionalData Structures](http://www.kmonos.net/pub/Presen/PFDS.pdf)より
+
+## 動機
+
+PFDSのアルゴリズムをCoqで書きたい
 
 ## ディレクトリ構成
 
