@@ -29,7 +29,7 @@ jobs:
       - run: ls -la
       - add_ssh_keys:
           fingerprints:
-            - ""
+            - "ba:fd:e0:1b:d6:86:54:b9:99:ef:da:02:25:6a:cd:4f"
       - run:
           name: Deploy docs to gh-pages branch
           command: gh-pages --message "[skip ci] doc upload" --dist .
