@@ -14,7 +14,7 @@ Import Elem.Op.
 (**
  ** 赤黒木(Red Black Tree)
 
-    #<img width="100%" src="http://raw.github.o-in.dwango.co.jp/Yoshihiro-Imai/pfds_coq/master/imgs/redblacktree_sample.jpg" />#
+    #<img width="100%" src="https://raw.githubusercontent.com/yoshihiro503/pfds_coq/master/imgs/redblacktree_sample.jpg" />#
  *)
 
 Inductive color := 赤 | 黒.
@@ -257,7 +257,7 @@ Proof.
   - (* a 黒の時 *)
     now constructor.
 Qed.
-  
+
 Lemma balance_Colored_b : forall a y col_b b1 x b2,
     balance 黒 a y (T col_b b1 x b2) = T 黒 a y (T col_b b1 x b2) ->
     WellColored b1 -> WellColored b2 -> WellColored a -> WellColored (T col_b b1 x b2).
@@ -288,7 +288,7 @@ Proof.
     destruct (IHa HCa) as [t1 [t2 [e [col_a [Heq [HCt1 HCt2]]]]]].
     apply (balance_aux (fun '(col', a', y', b') t => col'=col /\ a'=(ins x a) /\ y'=y /\ b'=b ->
       balance col (ins x a) y b = t ->
-      exists t1 t2 e col0, 
+      exists t1 t2 e col0,
       t = T col0 t1 e t2 /\ WellColored t1 /\ WellColored t2)).
     + (* もみほぐしがおきるときその1 *)
       intros a' b' c' d' x' y' z' [Hcol [Hins [Hz Hd]]] Hbalance. subst z' d' col.
@@ -325,7 +325,7 @@ Proof.
     destruct (IHb HCb) as [t1 [t2 [e [col_b [Heq [HCt1 HCt2]]]]]].
     apply (balance_aux (fun '(col', a', y', b') t => col'=col /\ a'=a /\ y'=y /\ b'=(ins x b) ->
       balance col a y (ins x b) = t ->
-      exists t1 t2 e col0, 
+      exists t1 t2 e col0,
       t = T col0 t1 e t2 /\ WellColored t1 /\ WellColored t2)).
     + (* もみほぐしがおきるときその1 *)
       intros a' b' c' d' x' y' z' [Hcol [Hins [Hz Hd]]] Hbalance. subst z' d' col.
@@ -511,7 +511,7 @@ Proof.
   - (* もみほぐし がおきない *)
     intros col' a' y' b' [Hcol [Ha [Hy Hb]]]. subst. now constructor.
   - tauto.
-Qed.    
+Qed.
 
 Lemma ins_Ordered : forall x t,
     Ordered t -> Ordered (ins x t).
@@ -707,7 +707,7 @@ Proof.
     + rewrite <- Hfola1. apply (IH (q, xs, d-1)). omega.
     + rewrite <- Hfola2. apply (IH (_, _, _)).
       destruct (r =? 0)%nat; omega.
-Qed.        
+Qed.
 
 (**
    赤黒木となる条件その2: 赤-赤違反がないこと
