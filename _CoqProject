@@ -1,0 +1,14 @@
+-R "." "PFDS"
+COQDOCFLAGS = "--utf8 --no-lib-name --lib-name '<img width=50px src=https://images-na.ssl-images-amazon.com/images/I/41XlPaC%2BZqL._SX326_BO1,204,203,200_.jpg />'"
+common/Util.v
+common/Result.v
+common/DecidableEq.v
+common/TotalOrder.v
+common/DecidableOrder.v
+common/Power.v
+common/Modulo.v
+2/BinaryTree.v
+3/LeftistHeap.v
+3/BinomialHeap.v
+3/RedBlackTree.v
+5/BatchedQueue.v

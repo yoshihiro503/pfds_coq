@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>PFDS.3.BinomialHeap</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle"><img width=50px src=https://images-na.ssl-images-amazon.com/images/I/41XlPaC%2BZqL._SX326_BO1,204,203,200_.jpg /> PFDS.3.BinomialHeap</h1>
+
+<div class="code">
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Program.Program.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">Program</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Arith.Arith.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">Arith</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Strings.String.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">String</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">List</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.funind.Recdef.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">Recdef</span></a>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">list_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="PFDS.common.Util.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">PFDS.common.Util</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="PFDS.common.DecidableOrder.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">PFDS.common.DecidableOrder</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="PFDS.common.Result.html#"><span class="id" title="<img width=50px src=https://images-na.ssl-images-amazon.com/images/i/41xlpac%2bzql._sx326_bo1,204,203,200_.jpg />">PFDS.common.Result</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Declare Module</span> <a name="Seed"><span class="id" title="module">Seed</span></a> : <a class="idref" href="PFDS.common.DecidableOrder.html#Seed"><span class="id" title="module">DecidableOrder.Seed</span></a>.<br/>
+<span class="id" title="keyword">Module</span> <a name="Elem"><span class="id" title="module">Elem</span></a> := <a class="idref" href="PFDS.common.DecidableOrder.html#Make"><span class="id" title="module">DecidableOrder.Make</span></a>(<a class="idref" href="PFDS.3.BinomialHeap.html#Seed"><span class="id" title="module">Seed</span></a>).<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Elem.Op</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab22"></a><h2 class="section">二項木(Binomial Tree)</h2>
+
+ 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+   二項木は以下のように帰納的に定義される (p.30)
+<ul class="doclist">
+<li> ランク <span class="inlinecode">0</span> の二項木は 単一ノード
+
+</li>
+<li> ランク <span class="inlinecode"><span class="id" title="var">r</span>+1</span> の二項木 はランク <span class="inlinecode"><span class="id" title="var">r</span></span>の２つの二項木を <span class="inlinecode"><span class="id" title="var">link</span></span>して作られる、
+
+</li>
+</ul>
+   このとき片方の木をもう片方の木の最左の子としてつなげる。
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Inductive</span> <a name="tree"><span class="id" title="inductive">tree</span></a> : <span class="id" title="keyword">Set</span> :=<br/>
+| <a name="Node"><span class="id" title="constructor">Node</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#T"><span class="id" title="axiom">Elem.T</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="rank"><span class="id" title="definition">rank</span></a> <span class="id" title="var">t</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="PFDS.3.BinomialHeap.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> <span class="id" title="var">r</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> ⇒ <span class="id" title="var">r</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab23"></a><h3 class="section">二項木の具体例</h3>
+
+   二項木の具体例は以下の通り
+<ul class="doclist">
+<li> ランク <span class="inlinecode">0</span> : <span class="inlinecode"><span class="id" title="var">Tree</span></span> <span class="inlinecode">0</span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">[]</span>
+
+</li>
+<li> ランク <span class="inlinecode">1</span> : <span class="inlinecode"><span class="id" title="var">Tree</span></span> <span class="inlinecode">1</span> <span class="inlinecode"><span class="id" title="var">y</span></span> <span class="inlinecode">[(<span class="id" title="var">Tree</span></span> <span class="inlinecode">0</span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">[])]</span>
+
+</li>
+<li> ランク <span class="inlinecode">2</span> : <span class="inlinecode"><span class="id" title="var">Tree</span></span> <span class="inlinecode">2</span> <span class="inlinecode"><span class="id" title="var">z</span></span> <span class="inlinecode">[(<span class="id" title="var">Tree</span></span> <span class="inlinecode">1</span> <span class="inlinecode"><span class="id" title="var">y</span></span> <span class="inlinecode">[(<span class="id" title="var">Tree</span></span> <span class="inlinecode">0</span> <span class="inlinecode"><span class="id" title="var">x</span></span> <span class="inlinecode">[])]);</span> <span class="inlinecode">(<span class="id" title="var">Tree</span></span> <span class="inlinecode">0</span> <span class="inlinecode"><span class="id" title="var">p</span></span> <span class="inlinecode">[])]</span>
+
+</li>
+</ul>
+   (要素の数はランク<span class="inlinecode"><span class="id" title="var">r</span></span>に従ってちょうど <span class="inlinecode">2^<span class="id" title="var">r</span></span> 個となる)
+ 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<a name="lab24"></a><h3 class="section"><span class="inlinecode"><span class="id" title="var">link</span></span> 関数の実装</h3>
+
+   リンクするのはランクの等しい木だけ。
+   引数の木は、上記の二項木の制約を満たすもののみを想定すれば良いっぽい。
+   できる木は必ず子要素がランクの昇順に並んでいるはず
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="link"><span class="id" title="definition">link</span></a> <span class="id" title="var">t1</span> <span class="id" title="var">t2</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#t1"><span class="id" title="variable">t1</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t2"><span class="id" title="variable">t2</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> <span class="id" title="var">r</span> <span class="id" title="var">x1</span> <span class="id" title="var">c1</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> <span class="id" title="var">_</span> <span class="id" title="var">x2</span> <span class="id" title="var">c2</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <a class="idref" href="PFDS.3.BinomialHeap.html#leq_bool"><span class="id" title="axiom">Elem.leq_bool</span></a> <span class="id" title="var">x1</span> <span class="id" title="var">x2</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> (<span class="id" title="var">r</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Peano.html#b3eea360671e1b32b18a26e15b3aace3"><span class="id" title="notation">+</span></a>1) <span class="id" title="var">x1</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#t2"><span class="id" title="variable">t2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">c1</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> (<span class="id" title="var">r</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Peano.html#b3eea360671e1b32b18a26e15b3aace3"><span class="id" title="notation">+</span></a>1) <span class="id" title="var">x2</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#t1"><span class="id" title="variable">t1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">c2</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <a name="BinomialTree"><span class="id" title="inductive">BinomialTree</span></a> : <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <span class="id" title="keyword">Prop</span> :=<br/>
+| <a name="BT_O"><span class="id" title="constructor">BT_O</span></a>: <span class="id" title="keyword">∀</span> <span class="id" title="var">x</span>, <a class="idref" href="PFDS.3.BinomialHeap.html#BinomialTree"><span class="id" title="inductive">BinomialTree</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> 0 <a class="idref" href="PFDS.3.BinomialHeap.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a>)<br/>
+| <a name="BT_S"><span class="id" title="constructor">BT_S</span></a>: <span class="id" title="keyword">∀</span> <span class="id" title="var">r</span> <span class="id" title="var">t1</span> <span class="id" title="var">t2</span>, <a class="idref" href="PFDS.3.BinomialHeap.html#BinomialTree"><span class="id" title="inductive">BinomialTree</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t1"><span class="id" title="variable">t1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#BinomialTree"><span class="id" title="inductive">BinomialTree</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t2"><span class="id" title="variable">t2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t1"><span class="id" title="variable">t1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#r"><span class="id" title="variable">r</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t2"><span class="id" title="variable">t2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#r"><span class="id" title="variable">r</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#d43e996736952df71ebeeae74d10a287"><span class="id" title="notation">→</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#BinomialTree"><span class="id" title="inductive">BinomialTree</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#link"><span class="id" title="definition">link</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t1"><span class="id" title="variable">t1</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t2"><span class="id" title="variable">t2</span></a>)<br/>
+.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab25"></a><h2 class="section">二項ヒープ(Binomial Heap)</h2>
+
+ 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+   二項木をランクに関して昇順に並べたリストとして二項ヒープを定義。
+   ランクが同じ二項木は存在しないものとする。
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="heap"><span class="id" title="definition">heap</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a>.<br/>
+
+<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab26"></a><h3 class="section"><span class="inlinecode"><span class="id" title="var">insert</span></span> の実装</h3>
+
+   ヒープに<span class="inlinecode"><span class="id" title="var">Elem.T</span></span>型の要素を１つだけ追加する<span class="inlinecode"><span class="id" title="var">insert</span></span>関数の定義。(p.31)
+   <span class="inlinecode"><span class="id" title="var">insert</span></span>は要素数1の二項木を追加するというアルゴリズムで実現する。
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Fixpoint</span> <a name="insTree"><span class="id" title="definition">insTree</span></a> <span class="id" title="var">t</span> <span class="id" title="var">heap</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="PFDS.3.BinomialHeap.html#heap"><span class="id" title="variable">heap</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a> ⇒ <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">[</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#t"><span class="id" title="variable">t</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">]</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="var">t'</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">ts</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t"><span class="id" title="variable">t</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Arith.PeanoNat.html#558f8b76d149cdb311ec341fe9014aa8"><span class="id" title="notation">&lt;?</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <span class="id" title="var">t'</span>)%<span class="id" title="var">nat</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#t"><span class="id" title="variable">t</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">ts</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#insTree"><span class="id" title="definition">insTree</span></a>(<a class="idref" href="PFDS.3.BinomialHeap.html#link"><span class="id" title="definition">link</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="var">t'</span>) <span class="id" title="var">ts</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="insert"><span class="id" title="definition">insert</span></a> <span class="id" title="var">x</span> <span class="id" title="var">heap</span> := <a class="idref" href="PFDS.3.BinomialHeap.html#insTree"><span class="id" title="definition">insTree</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> 0 <a class="idref" href="PFDS.3.BinomialHeap.html#x"><span class="id" title="variable">x</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a>) <a class="idref" href="PFDS.3.BinomialHeap.html#heap"><span class="id" title="variable">heap</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab27"></a><h3 class="section"><span class="inlinecode"><span class="id" title="var">merge</span></span> の実装</h3>
+
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Function</span> <span class="id" title="var">merge</span> <span class="id" title="var">ts1_ts2</span> {<span class="id" title="keyword">measure</span> (<a class="idref" href="PFDS.common.Util.html#pair_size"><span class="id" title="definition">pair_size</span></a> (@<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#length"><span class="id" title="abbreviation">List.length</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a>) (@<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#length"><span class="id" title="abbreviation">List.length</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a>)) <span class="id" title="var">ts1_ts2</span>} :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#ts1_ts2"><span class="id" title="variable">ts1_ts2</span></a>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">ts1</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> ⇒ <span class="id" title="var">ts1</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">ts2</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> ⇒ <span class="id" title="var">ts2</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">t1</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">ts1'</span> <span class="id" title="keyword">as</span> <span class="id" title="var">ts1</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">t2</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">ts2'</span> <span class="id" title="keyword">as</span> <span class="id" title="var">ts2</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <span class="id" title="var">t1</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Arith.PeanoNat.html#558f8b76d149cdb311ec341fe9014aa8"><span class="id" title="notation">&lt;?</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <span class="id" title="var">t2</span>)%<span class="id" title="var">nat</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">t1</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#merge"><span class="id" title="definition">merge</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">ts1'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">ts2</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <span class="id" title="var">t2</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Arith.PeanoNat.html#558f8b76d149cdb311ec341fe9014aa8"><span class="id" title="notation">&lt;?</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#rank"><span class="id" title="definition">rank</span></a> <span class="id" title="var">t1</span>)%<span class="id" title="var">nat</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">t2</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#merge"><span class="id" title="definition">merge</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">ts1</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">ts2'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#insTree"><span class="id" title="definition">insTree</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#link"><span class="id" title="definition">link</span></a> <span class="id" title="var">t1</span> <span class="id" title="var">t2</span>) (<a class="idref" href="PFDS.3.BinomialHeap.html#merge"><span class="id" title="definition">merge</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">ts1'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">ts2'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">simpl</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">arith</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">simpl</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">arith</span>.<br/>
+&nbsp;&nbsp;- <span class="id" title="tactic">simpl</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">arith</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab28"></a><h3 class="section"><span class="inlinecode"><span class="id" title="var">findMin</span></span>, <span class="inlinecode"><span class="id" title="var">deleteMin</span></span>の定義</h3>
+
+   
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+   二項木から根っこの値をとる関数。この木の中に含まれる最小の値が取れるはず。
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="root"><span class="id" title="definition">root</span></a> <span class="id" title="var">tree</span> : <a class="idref" href="PFDS.3.BinomialHeap.html#T"><span class="id" title="axiom">Elem.T</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> '(<a class="idref" href="PFDS.3.BinomialHeap.html#Node"><span class="id" title="constructor">Node</span></a> <span class="id" title="var">_</span> <span class="id" title="var">x</span> <span class="id" title="var">_</span>) := <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="variable">tree</span></a> <span class="id" title="keyword">in</span> <span class="id" title="var">x</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+   ヒープから最小のroot値を持つ木を抜き出して、その木と残ったヒープを組みで返す。
+   ヒープがからの場合を想定して<span class="inlinecode"><span class="id" title="var">Result</span></span>型を返す
+   <span class="inlinecode"><span class="id" title="var">map</span></span>と<span class="inlinecode"><span class="id" title="tactic">fold</span></span>でもかける気がするが教科書に合わせて再帰で書いた。
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Fixpoint</span> <a name="removeMinTree"><span class="id" title="definition">removeMinTree</span></a> (<span class="id" title="var">h</span>: <a class="idref" href="PFDS.3.BinomialHeap.html#heap"><span class="id" title="definition">heap</span></a>) : <a class="idref" href="PFDS.common.Result.html#Result"><span class="id" title="inductive">Result</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#d19c7eafd0e2d195d10df94b392087b5"><span class="id" title="notation">×</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#heap"><span class="id" title="definition">heap</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="PFDS.3.BinomialHeap.html#h"><span class="id" title="variable">h</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a> ⇒ <a class="idref" href="PFDS.common.Result.html#Error"><span class="id" title="constructor">Error</span></a> "empty"<br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">[</span></a><span class="id" title="var">t</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">]</span></a> ⇒ <a class="idref" href="PFDS.common.Result.html#Ok"><span class="id" title="constructor">Ok</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">t</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#145bedf8a5d4a541831f3f70db03085c"><span class="id" title="notation">[]</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="var">t</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">ts</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#removeMinTree"><span class="id" title="definition">removeMinTree</span></a> <span class="id" title="var">ts</span> <a class="idref" href="PFDS.common.Result.html#536ef57757278fb23d9a25071832cfce"><span class="id" title="notation">&gt;&gt;=</span></a> <span class="id" title="keyword">fun</span> <span class="id" title="var">t'_ts'</span> ⇒<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> '<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">t'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">ts'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a> := <a class="idref" href="PFDS.3.BinomialHeap.html#t'_ts'"><span class="id" title="variable">t'_ts'</span></a> <span class="id" title="keyword">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <span class="id" title="var">t</span> <a class="idref" href="PFDS.common.DecidableOrder.html#4cff183869652b01fdc41699a5ff895b"><span class="id" title="notation">&lt;=?</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <span class="id" title="var">t'</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.common.Result.html#ret"><span class="id" title="definition">ret</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">t</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">ts</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.common.Result.html#ret"><span class="id" title="definition">ret</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><span class="id" title="var">t'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">t</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a><span class="id" title="var">ts'</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+   ヒープに含まれる最小のElem.Tの値を返す
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="findMin"><span class="id" title="definition">findMin</span></a> <span class="id" title="var">ts</span> : <a class="idref" href="PFDS.common.Result.html#Result"><span class="id" title="inductive">Result</span></a>(<a class="idref" href="PFDS.3.BinomialHeap.html#T"><span class="id" title="axiom">Elem.T</span></a>) :=<br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#removeMinTree"><span class="id" title="definition">removeMinTree</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#ts"><span class="id" title="variable">ts</span></a> <a class="idref" href="PFDS.common.Result.html#536ef57757278fb23d9a25071832cfce"><span class="id" title="notation">&gt;&gt;=</span></a> <span class="id" title="keyword">fun</span> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">'(</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">t</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">,</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">_</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">)</span></a> ⇒<br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.common.Result.html#Ok"><span class="id" title="constructor">Ok</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <span class="id" title="var">t</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+   二項木の子要素<span class="inlinecode"><span class="id" title="var">ts1</span></span>は二項ヒープとなっているはずなので、mergeできる。
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="deleteMin"><span class="id" title="definition">deleteMin</span></a> <span class="id" title="var">ts</span> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#removeMinTree"><span class="id" title="definition">removeMinTree</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#ts"><span class="id" title="variable">ts</span></a> <a class="idref" href="PFDS.common.Result.html#536ef57757278fb23d9a25071832cfce"><span class="id" title="notation">&gt;&gt;=</span></a> <span class="id" title="keyword">fun</span> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">'(</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">Node</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">_</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">x</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">ts1</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">,</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">ts2</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">)</span></a> ⇒<br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.common.Result.html#Ok"><span class="id" title="constructor">Ok</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#merge"><span class="id" title="lemma">merge</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">(</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#rev"><span class="id" title="definition">List.rev</span></a> <span class="id" title="var">ts1</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">,</span></a> <span class="id" title="var">ts2</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#44400027531d4bc3f586a1997dc874c0"><span class="id" title="notation">)</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab29"></a><h2 class="section">演習問題3.5</h2>
+
+   <span class="inlinecode"><span class="id" title="var">removeMinTree</span></span>の呼び出しを経由せず、findMinを直接的に定義してみよう
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="findMin'"><span class="id" title="definition">findMin'</span></a> <span class="id" title="var">ts</span> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#ts"><span class="id" title="variable">ts</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.common.Util.html#beb1c8190f1cfe5766eb4cf7e81fe853"><span class="id" title="notation">|&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.common.Util.html#beb1c8190f1cfe5766eb4cf7e81fe853"><span class="id" title="notation">|&gt;</span></a> <a class="idref" href="PFDS.common.Util.html#reduce"><span class="id" title="definition">reduce</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#min"><span class="id" title="definition">Elem.min</span></a><br/>
+.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="findMin'_correct_aux"><span class="id" title="lemma">findMin'_correct_aux</span></a>: <span class="id" title="keyword">∀</span> <span class="id" title="var">t0</span> <span class="id" title="var">ts</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="PFDS.common.Result.html#Ok"><span class="id" title="constructor">Ok</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#fold_right"><span class="id" title="definition">fold_right</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#min"><span class="id" title="definition">Elem.min</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#t0"><span class="id" title="variable">t0</span></a>) (<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#ts"><span class="id" title="variable">ts</span></a>)) <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">(</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#removeMinTree"><span class="id" title="definition">removeMinTree</span></a> ((<a class="idref" href="PFDS.3.BinomialHeap.html#ts"><span class="id" title="variable">ts</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#5d35a99a6abff1d64bf70538feb70e36"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">[</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#t0"><span class="id" title="variable">t0</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">]</span></a>)%<span class="id" title="var">list</span>) <a class="idref" href="PFDS.common.Result.html#536ef57757278fb23d9a25071832cfce"><span class="id" title="notation">&gt;&gt;=</span></a> <span class="id" title="keyword">fun</span> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">'(</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">tx</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">,</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">_</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#pat"><span class="id" title="variable">)</span></a> ⇒ <a class="idref" href="PFDS.common.Result.html#Ok"><span class="id" title="constructor">Ok</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <span class="id" title="var">tx</span>)<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">)</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">ts</span>.<br/>
+&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;- <span class="id" title="tactic">simpl</span>. <span class="id" title="var">revert</span> <span class="id" title="var">IHts</span>. <span class="id" title="var">case_eq</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#removeMinTree"><span class="id" title="definition">removeMinTree</span></a> (<span class="id" title="var">ts</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#5d35a99a6abff1d64bf70538feb70e36"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">[</span></a><span class="id" title="var">t0</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">]</span></a>)%<span class="id" title="var">list</span>); [|<span class="id" title="tactic">discriminate</span>].<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">s_ss</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">s_ss</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">s</span> <span class="id" title="var">ss</span>]. <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">eq</span> <span class="id" title="var">IH</span>. <span class="id" title="tactic">injection</span> <span class="id" title="var">IH</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">IH'</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#leq_dec"><span class="id" title="definition">Elem.leq_dec</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <span class="id" title="var">a</span>) (<a class="idref" href="PFDS.3.BinomialHeap.html#root"><span class="id" title="definition">root</span></a> <span class="id" title="var">s</span>)).<br/>
+&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">IH'</span>. <span class="id" title="tactic">rewrite</span> (<a class="idref" href="PFDS.3.BinomialHeap.html#min_l"><span class="id" title="axiom">Elem.min_l</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">l</span>). <span class="id" title="var">now</span> <span class="id" title="tactic">destruct</span> (<span class="id" title="var">ts</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#5d35a99a6abff1d64bf70538feb70e36"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">[</span></a><span class="id" title="var">t0</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">]</span></a>)%<span class="id" title="var">list</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">IH'</span>. <span class="id" title="tactic">rewrite</span> <a class="idref" href="PFDS.3.BinomialHeap.html#min_r"><span class="id" title="axiom">Elem.min_r</span></a>; [| <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <a class="idref" href="PFDS.3.BinomialHeap.html#lt_le_incl"><span class="id" title="lemma">Elem.Ord.lt_le_incl</span></a>, <a class="idref" href="PFDS.3.BinomialHeap.html#not_le_lt"><span class="id" title="lemma">Elem.Ord.not_le_lt</span></a>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">destruct</span> (<span class="id" title="var">ts</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#5d35a99a6abff1d64bf70538feb70e36"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">[</span></a><span class="id" title="var">t0</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">]</span></a>)%<span class="id" title="var">list</span>; <span class="id" title="tactic">simpl</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <a name="findMin'_correct"><span class="id" title="lemma">findMin'_correct</span></a>: <span class="id" title="keyword">∀</span> <span class="id" title="var">ts</span>,<br/>
+&nbsp;&nbsp;<a class="idref" href="PFDS.3.BinomialHeap.html#findMin'"><span class="id" title="definition">findMin'</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#ts"><span class="id" title="variable">ts</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#findMin"><span class="id" title="definition">findMin</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#ts"><span class="id" title="variable">ts</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">ts</span>.<br/>
+&nbsp;- <span class="id" title="var">now</span> <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;- <span class="id" title="tactic">unfold</span> <a class="idref" href="PFDS.3.BinomialHeap.html#findMin"><span class="id" title="definition">findMin</span></a>, <a class="idref" href="PFDS.3.BinomialHeap.html#findMin'"><span class="id" title="definition">findMin'</span></a>, <a class="idref" href="PFDS.common.Util.html#pipeline"><span class="id" title="definition">pipeline</span></a>, <a class="idref" href="PFDS.common.Util.html#reduce"><span class="id" title="definition">reduce</span></a>, <a class="idref" href="PFDS.common.Util.html#reduce_right"><span class="id" title="definition">reduce_right</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">cut</span> (<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">∃</span></a> <span class="id" title="var">u</span> <span class="id" title="var">us</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#84eb6d2849dbf3581b1c0c05add5f2d8"><span class="id" title="notation">,</span></a> <span class="id" title="var">t</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a> <span class="id" title="var">ts</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Logic.html#1c39bf18749e5cc609e83c0a0ba5a372"><span class="id" title="notation">=</span></a> (<a class="idref" href="PFDS.3.BinomialHeap.html#us"><span class="id" title="variable">us</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#5d35a99a6abff1d64bf70538feb70e36"><span class="id" title="notation">++</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">[</span></a><a class="idref" href="PFDS.3.BinomialHeap.html#u"><span class="id" title="variable">u</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#64ee52ab9627fca8d637e2f1207a2990"><span class="id" title="notation">]</span></a>)%<span class="id" title="var">list</span>).<br/>
+&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span> <span class="id" title="var">Exu</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">Exu</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">u</span> <span class="id" title="var">Exus</span>]. <span class="id" title="tactic">destruct</span> <span class="id" title="var">Exus</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">us</span> <span class="id" title="var">eq</span>]. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">eq</span> <span class="id" title="tactic">at</span> 2.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> &lt;- <a class="idref" href="PFDS.3.BinomialHeap.html#findMin'_correct_aux"><span class="id" title="lemma">findMin'_correct_aux</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">f_equal</span>. <span class="id" title="tactic">apply</span> <a class="idref" href="PFDS.common.Util.html#fold_right_cons_tail"><span class="id" title="lemma">Util.fold_right_cons_tail</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;× <span class="id" title="tactic">apply</span> <a class="idref" href="PFDS.3.BinomialHeap.html#min_assoc"><span class="id" title="axiom">Elem.min_assoc</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;× <span class="id" title="tactic">apply</span> <a class="idref" href="PFDS.3.BinomialHeap.html#min_comm"><span class="id" title="axiom">Elem.min_comm</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;× <span class="id" title="tactic">rewrite</span> &lt;- <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#map_cons"><span class="id" title="lemma">map_cons</span></a>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">eq</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#map_app"><span class="id" title="lemma">map_app</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (@<a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Lists.List.html#exists_last"><span class="id" title="lemma">List.exists_last</span></a> <a class="idref" href="PFDS.3.BinomialHeap.html#tree"><span class="id" title="inductive">tree</span></a> (<span class="id" title="var">t</span><a class="idref" href="http://coq.inria.fr/distrib/8.6.1/stdlib/Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a><span class="id" title="var">ts</span>)) <span class="id" title="keyword">as</span> [<span class="id" title="var">us</span> <span class="id" title="var">Exu</span>]; [<span class="id" title="tactic">discriminate</span>|].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Exu</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">u</span>  <span class="id" title="var">eq</span>]. <span class="id" title="var">now</span> <span class="id" title="tactic">∃</span> <span class="id" title="var">u</span>, <span class="id" title="var">us</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab30"></a><h2 class="section">演習問題3.6</h2>
+
+
+<div class="paragraph"> </div>
+
+    treeの代わりにheapでrankを持ったらどうなるかっていうこと
+
+<div class="paragraph"> </div>
+
+    (treeのノードで持つ代わりに,heapの中で <span class="inlinecode">(<span class="id" title="var">rank</span>,</span> <span class="inlinecode"><span class="id" title="var">tree</span>)</span> のタプルリストみたいにして持つようにする。)
+<pre>
+    link: (rank * tree) -&gt; (rank * tree) -&gt; (rank * tree) のような型になる
+    insTree: (rank * tree) -&gt; heap -&gt; heap
+    merge : heap -&gt; heap -&gt; heap だから型は変わらない。
+</pre>
+    removeMinTree とか findMin とかはもうrank関係ないからこのままで。
+
+<div class="paragraph"> </div>
+
+    link, insTree, insert, mergeの実装を修正すればよさそう
+ 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<a name="lab31"></a><h2 class="section">演習問題3.7</h2>
+
+
+<div class="paragraph"> </div>
+
+    例えばinsertはScalaで次のような感じかな:
+<pre>
+    def insert (x: Elem.T, h: Heap) = {
+      h match {
+        case E =&gt; NE(x, H.singleton(x))
+        case NE(m, ih) =&gt;
+          NE(min(m, x), H.insert(x, ih))
+      }
+    }
+</pre>
+    mergeなども同様にできそう。
+
+<div class="paragraph"> </div>
+
+    `NE(x, ih)` で `ih`の中に `x` を含まない流派 (a.mutake派)と 含む派 (y.oshihiro503派) がある。(上記は含む派)
+ 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+<a name="lab32"></a><h2 class="section">3.2節まとめ</h2>
+
+
+<div class="paragraph"> </div>
+
+<pre>
+insert : O(log n)
+merge: O(log n)
+findMin: O(log n)
+deleteMin: O(log n)
+</pre>
+
+<div class="paragraph"> </div>
+
+ただし、ちょっとした拡張でfindMinはO(1)にできる (ExplicitMinファンクタ)
+ 
+</div>
+<div class="code">
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="index.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
