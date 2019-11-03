@@ -197,8 +197,6 @@ Qed.
 (**
  ** 演習問題3.6
 
-    https://dwango.slack.com/archives/C0CJRPYU8/p1501238725206210
-
     treeの代わりにheapでrankを持ったらどうなるかっていうこと
 
     (treeのノードで持つ代わりに,heapの中で [(rank, tree)] のタプルリストみたいにして持つようにする。)
@@ -216,8 +214,6 @@ Qed.
 (**
  ** 演習問題3.7
 
-    https://dwango.slack.com/archives/C0CJRPYU8/p1501240301621876
-
     例えばinsertはScalaで次のような感じかな:
 <<
     def insert (x: Elem.T, h: Heap) = {
@@ -229,7 +225,7 @@ Qed.
     }
 >>
     mergeなども同様にできそう。
-    
+
     `NE(x, ih)` で `ih`の中に `x` を含まない流派 (a.mutake派)と 含む派 (y.oshihiro503派) がある。(上記は含む派)
  *)
 
